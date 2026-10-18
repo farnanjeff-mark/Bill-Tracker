@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bill Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Bill Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap">
+<style>
+:root {
+  --bg: #F2F5F2; --surface: #FFFFFF; --fg: #17231D; --muted: #53625A; --line: #D5DDD6; --field: #A8B4AC;
+  --green: #1F5C45; --green-fg: #FFFFFF; --green-soft: #E4EFE9;
+  --blue-fg: #1F4E8C; --blue-bg: #E3ECF8;
+  --warn-bg: #F6E8C3; --warn-fg: #5A4210; --no-bg: #F6DCDC; --no-fg: #7A1F1F; --abs-bg: #E4E8E5; --abs-fg: #3B4740;
+  --err-bg: #F6DCDC; --err-fg: #7A1F1F;
+  --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F1814; --surface: #17231D; --fg: #E8EFEA; --muted: #9DB0A5; --line: #2B3B33; --field: #4C5F55;
+    --green: #4FA37F; --green-fg: #08120D; --green-soft: #1C3328;
+    --blue-fg: #A9C8F5; --blue-bg: #1B2D47;
+    --warn-bg: #3A3015; --warn-fg: #F0D98F; --no-bg: #3D1F1F; --no-fg: #F2B6B6; --abs-bg: #26332C; --abs-fg: #C7D4CC;
+    --err-bg: #3D1F1F; --err-fg: #F2B6B6;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0; height: 100%; height: 100dvh; display: flex; flex-direction: column;
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--blue-fg); outline-offset: 2px; }
+.in {
+  width: 100%; max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.band { background: var(--surface); flex: 0 0 auto; }
+.top { border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.top .in { padding-block: 14px 12px; display: flex; flex-direction: column; gap: 10px; }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 1.2; color: var(--green); }
+.brand span { font-size: 14px; color: var(--muted); }
+#lookup { display: flex; gap: 8px; }
+#billnum {
+  flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
+  background: var(--surface); border: 1px solid var(--field); border-radius: 8px;
+}
+.btn { height: 46px; padding: 0 20px; font-weight: 700; border: 0; border-radius: 8px; background: var(--green); color: var(--green-fg); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn.small { height: 40px; padding: 0 16px; }
+.btn.ghost { background: transparent; color: var(--blue-fg); border: 1px solid var(--blue-fg); }
+#msg { margin: 0; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+#msg.err { background: var(--err-bg); color: var(--err-fg); padding: 8px 12px; border-radius: 8px; }
+main { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+main .in { padding-block: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+h2 { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.25; text-wrap: balance; }
+h3 { margin: 0; font-family: var(--font-display); font-size: 18px; }
+.status { align-self: flex-start; margin: 0; font-size: 14px; font-weight: 700; color: var(--blue-fg); background: var(--blue-bg); border-radius: 12px; padding: 4px 12px; }
+.summary { margin: 0; white-space: pre-line; }
+.hint { margin: 0; color: var(--muted); }
+.sections { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+details { border-bottom: 1px solid var(--line); }
+details:last-child { border-bottom: 0; }
+summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+details p { margin: 0 0 14px; white-space: pre-line; color: var(--muted); }
+.lbl { font-size: 14px; font-weight: 700; }
+textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; resize: vertical; }
+.checks { display: flex; flex-direction: column; }
+.checks label { min-height: 44px; display: flex; align-items: center; gap: 12px; }
+.checks input { width: 22px; height: 22px; accent-color: var(--green); margin: 0; }
+.listhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.listhead span { font-size: 14px; color: var(--muted); }
+#list { display: flex; flex-direction: column; gap: 8px; }
+.row { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.row[aria-current="true"] { border-color: var(--green); background: var(--green-soft); }
+.rt { font-weight: 700; }
+.rs { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 14px; font-weight: 700; border-radius: 999px; padding: 2px 10px; }
+.chip.yes { background: var(--green); color: var(--green-fg); }
+.chip.no { background: var(--no-bg); color: var(--no-fg); }
+.chip.und { background: var(--warn-bg); color: var(--warn-fg); }
+.chip.abs { background: var(--abs-bg); color: var(--abs-fg); }
+.chip.tag { background: var(--blue-bg); color: var(--blue-fg); }
+footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.votes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.votes button { height: 44px; padding: 0; font-size: 15px; font-weight: 600; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+.votes button[aria-pressed="true"] { background: var(--green); color: var(--green-fg); border-color: var(--green); font-weight: 700; }
+#save { width: 100%; }
+#savestat { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tabs button { height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; background: transparent; border: 0; border-top: 3px solid transparent; color: var(--muted); font-size: 15px; font-weight: 600; }
+.tabs .n { font-size: 14px; font-weight: 400; }
+.tabs button[aria-pressed="true"] { color: var(--green); border-top-color: var(--green); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="band top">
+  <div class="in">
+    <div class="brand"><h1>Bill Tracker</h1><span>Missouri General Assembly</span></div>
+    <form id="lookup" autocomplete="off">
+      <input id="billnum" type="text" aria-label="Bill number" placeholder="HB 2600" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <button class="btn" id="go" type="submit">Look up</button>
+    </form>
+    <p id="msg" role="status" hidden></p>
+  </div>
+</div>
+
+<main id="main">
+  <div class="in">
+    <section class="card" id="empty">
+      <p class="hint" id="emptyText">Loading saved bills.</p>
+    </section>
+
+    <section class="card" id="detail" hidden>
+      <h2 id="dTitle"></h2>
+      <p class="status" id="dStatus" hidden></p>
+      <p class="summary" id="dSummary"></p>
+      <div class="sections">
+        <details><summary>Pros and cons</summary><p id="sPros"></p></details>
+        <details><summary>Questions to ask</summary><p id="sQuestions"></p></details>
+        <details><summary>Where it is in the process</summary><p id="sProcess"></p></details>
+        <details><summary>Can it be amended onto other bills?</summary><p id="sAmend"></p></details>
+      </div>
+      <button class="btn small ghost" id="refresh" type="button">Update from LegiScan</button>
+    </section>
+
+    <section class="card" id="noteCard" hidden>
+      <h3>Your notes</h3>
+      <textarea id="notes" rows="5" aria-label="Notes" placeholder="Why you lean this way, who you talked to, constituent input"></textarea>
+      <div class="lbl">Save to</div>
+      <div class="checks">
+        <label><input type="checkbox" checked disabled> All bills</label>
+        <label><input type="checkbox" id="chkMine"> My bills</label>
+        <label><input type="checkbox" id="chkCom"> Professional Registration</label>
+      </div>
+    </section>
+
+    <section>
+      <div class="listhead"><h3 id="listTitle">All bills</h3><span id="listCount"></span></div>
+      <div id="list"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="band">
+  <div class="in">
+    <div class="votes" role="group" aria-label="Your vote">
+      <button type="button" data-vote="Yes" aria-pressed="false">Yes</button>
+      <button type="button" data-vote="No" aria-pressed="false">No</button>
+      <button type="button" data-vote="Undecided" aria-pressed="true">Undecided</button>
+      <button type="button" data-vote="Abstain" aria-pressed="false">Abstain</button>
+    </div>
+    <button class="btn" id="save" type="button" disabled>Save vote and notes</button>
+    <p id="savestat" role="status" aria-live="polite" hidden></p>
+    <div class="tabs" role="group" aria-label="Bill groups">
+      <button type="button" data-tab="all" aria-label="All bills" aria-pressed="true"><span>All bills</span><span class="n">0</span></button>
+      <button type="button" data-tab="my" aria-label="My bills" aria-pressed="false"><span>My bills</span><span class="n">0</span></button>
+      <button type="button" data-tab="committee" aria-label="Professional Registration" aria-pressed="false"><span>Prof. Reg.</span><span class="n">0</span></button>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // The Google Apps Script web app that looks bills up and stores your votes and notes.
+  var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
+
+  var state = {
+    bills: new Map(), order: [], selected: null, tab: 'all', vote: 'Undecided',
+    dirty: false, loaded: false, loadError: false, busy: false, saving: false
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function norm(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function disp(id) { var m = /^([A-Z]+)(\d+)$/.exec(id); return m ? m[1] + ' ' + m[2] : id; }
+  function h(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function voteClass(v) { return v === 'Yes' ? 'chip yes' : v === 'No' ? 'chip no' : v === 'Abstain' ? 'chip abs' : 'chip und'; }
+
+  function clean(b) {
+    function s(v) { return v == null ? '' : String(v); }
+    var mine = b.mine === true || String(b.mine).toUpperCase() === 'TRUE';
+    var com = b.committee === true || String(b.committee).toUpperCase() === 'TRUE';
+    return {
+      number: s(b.number), title: s(b.title), status: s(b.status), summary: s(b.summary),
+      proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
+      vote: s(b.vote) || 'Undecided', notes: s(b.notes), mine: mine, committee: com
+    };
+  }
+
+  // ---------- talking to the back room ----------
+
+  function api(payload) {
+    return fetch(BACKROOM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json(); }, function () {
+      throw new Error('Could not reach the back room. Check your connection and try again.');
+    }).then(function (j) {
+      if (!j || !j.ok) throw new Error((j && j.error) || 'Something went wrong. Try again.');
+      return j;
+    });
+  }
+
+  // ---------- messages ----------
+
+  function showMsg(text, actionLabel, action, isError) {
+    var m = $('msg');
+    m.textContent = '';
+    m.className = isError ? 'err' : '';
+    if (!text) { m.hidden = true; return; }
+    m.appendChild(h('span', '', text));
+    if (actionLabel) {
+      var b = h('button', 'btn small', actionLabel);
+      b.type = 'button';
+      b.addEventListener('click', action);
+      m.appendChild(b);
+    }
+    m.hidden = false;
+  }
+
+  function emptyMessage() {
+    if (state.loadError) return 'Saved bills could not be loaded.';
+    if (!state.loaded) return 'Loading saved bills.';
+    return 'No bills saved yet. Type a bill number above, like HB 2600.';
+  }
+
+  // ---------- drawing ----------
+
+  function inTab(b) {
+    if (state.tab === 'my') return !!b.mine;
+    if (state.tab === 'committee') return !!b.committee;
+    return true;
+  }
+
+  function renderTabs() {
+    var all = state.order.map(function (id) { return state.bills.get(id); });
+    var counts = {
+      all: all.length,
+      my: all.filter(function (b) { return b.mine; }).length,
+      committee: all.filter(function (b) { return b.committee; }).length
+    };
+    document.querySelectorAll('[data-tab]').forEach(function (btn) {
+      var t = btn.getAttribute('data-tab');
+      btn.setAttribute('aria-pressed', String(t === state.tab));
+      btn.querySelector('.n').textContent = String(counts[t]);
+    });
+  }
+
+  function renderList() {
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration' };
+    var box = $('list');
+    box.textContent = '';
+    $('listTitle').textContent = names[state.tab];
+    var ids = state.order.filter(function (id) { return inTab(state.bills.get(id)); });
+    $('listCount').textContent = ids.length + (ids.length === 1 ? ' bill' : ' bills');
+    if (!ids.length) {
+      var t = !state.loaded || state.loadError ? emptyMessage()
+        : state.tab === 'all' ? 'No bills saved yet.'
+        : 'Nothing here yet. Open a bill, tick ' + names[state.tab] + ', and save.';
+      box.appendChild(h('p', 'hint', t));
+      return;
+    }
+    ids.forEach(function (id) {
+      var b = state.bills.get(id);
+      var btn = h('button', 'row');
+      btn.type = 'button';
+      btn.setAttribute('aria-current', id === state.selected ? 'true' : 'false');
+      btn.appendChild(h('span', 'rt', b.number + (b.title ? ': ' + b.title : '')));
+      var sub = b.notes ? b.notes : b.status;
+      if (sub) btn.appendChild(h('span', 'rs', sub.length > 90 ? sub.slice(0, 90) + '...' : sub));
+      var chips = h('span', 'chips');
+      chips.appendChild(h('span', voteClass(b.vote), b.vote));
+      if (b.mine) chips.appendChild(h('span', 'chip tag', 'My bills'));
+      if (b.committee) chips.appendChild(h('span', 'chip tag', 'Prof. Reg.'));
+      btn.appendChild(chips);
+      btn.addEventListener('click', function () { select(id); });
+      box.appendChild(btn);
+    });
+  }
+
+  function renderVotes() {
+    document.querySelectorAll('[data-vote]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.getAttribute('data-vote') === state.vote));
+    });
+  }
+
+  function fillForm(b) {
+    state.vote = b.vote || 'Undecided';
+    $('notes').value = b.notes || '';
+    $('chkMine').checked = !!b.mine;
+    $('chkCom').checked = !!b.committee;
+    state.dirty = false;
+    renderVotes();
+  }
+
+  function renderDetail(force) {
+    var b = state.selected ? state.bills.get(state.selected) : null;
+    $('detail').hidden = !b;
+    $('noteCard').hidden = !b;
+    $('empty').hidden = !!b;
+    $('save').disabled = !b || state.saving;
+    $('refresh').disabled = !b || state.busy;
+    if (!b) { $('emptyText').textContent = emptyMessage(); return; }
+    $('dTitle').textContent = b.number + (b.title ? ': ' + b.title : '');
+    var st = $('dStatus');
+    st.textContent = b.status;
+    st.hidden = !b.status;
+    var none = 'Not available.';
+    $('dSummary').textContent = b.summary || none;
+    $('sPros').textContent = b.proscons || none;
+    $('sQuestions').textContent = b.questions || none;
+    $('sProcess').textContent = b.process || none;
+    $('sAmend').textContent = b.amend || none;
+    if (force || !state.dirty) fillForm(b);
+  }
+
+  function renderAll(forceForm) {
+    renderTabs();
+    renderList();
+    renderDetail(forceForm);
+  }
+
+  function select(id) {
+    state.selected = id;
+    state.dirty = false;
+    $('savestat').hidden = true;
+    renderAll(true);
+    $('main').scrollTop = 0;
+  }
+
+  // ---------- actions ----------
+
+  function setBusy(on) {
+    state.busy = on;
+    $('go').disabled = on;
+    $('refresh').disabled = on || !state.selected;
+  }
+
+  function loadList() {
+    state.loadError = false;
+    api({ action: 'list' }).then(function (j) {
+      state.bills = new Map();
+      state.order = [];
+      (j.bills || []).slice().reverse().forEach(function (raw) {
+        var b = clean(raw);
+        var id = norm(b.number);
+        if (id && !state.bills.has(id)) { state.bills.set(id, b); state.order.push(id); }
+      });
+      state.loaded = true;
+      if (!state.selected && state.order.length) state.selected = state.order[0];
+      showMsg('');
+      renderAll(true);
+    }).catch(function (err) {
+      state.loaded = true;
+      state.loadError = true;
+      showMsg(err.message, 'Try again', loadList, true);
+      renderAll(false);
+    });
+  }
+
+  function runLookup(id, refresh) {
+    if (state.busy) return;
+    setBusy(true);
+    showMsg('Looking up ' + disp(id) + '. This can take up to a minute.');
+    api({ action: 'lookup', number: disp(id), refresh: !!refresh }).then(function (j) {
+      var b = clean(j.bill);
+      var key = norm(b.number);
+      var isNew = !state.bills.has(key);
+      state.bills.set(key, b);
+      if (isNew) state.order.unshift(key);
+      showMsg('');
+      if (refresh && !isNew) {
+        renderAll(false);
+      } else {
+        select(key);
+      }
+    }).catch(function (err) {
+      showMsg(err.message, null, null, true);
+    }).then(function () {
+      setBusy(false);
+    });
+  }
+
+  function lookup(e) {
+    e.preventDefault();
+    var id = norm($('billnum').value);
+    if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
+      showMsg('Type a bill number like HB 2600 or SB 975.', null, null, true);
+      return;
+    }
+    $('billnum').value = disp(id);
+    if (state.bills.has(id)) { showMsg(''); select(id); return; }
+    runLookup(id, false);
+  }
+
+  function save() {
+    if (!state.selected || state.saving) return;
+    var b = state.bills.get(state.selected);
+    state.saving = true;
+    $('save').disabled = true;
+    var stat = $('savestat');
+    stat.textContent = 'Saving.';
+    stat.hidden = false;
+    api({
+      action: 'save', number: b.number, vote: state.vote, notes: $('notes').value,
+      mine: $('chkMine').checked, committee: $('chkCom').checked
+    }).then(function (j) {
+      var nb = clean(j.bill);
+      state.bills.set(state.selected, nb);
+      state.dirty = false;
+      stat.textContent = 'Saved at ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      renderAll(false);
+    }).catch(function (err) {
+      stat.textContent = err.message;
+    }).then(function () {
+      state.saving = false;
+      $('save').disabled = !state.selected;
+    });
+  }
+
+  function markDirty() { state.dirty = true; $('savestat').hidden = true; }
+
+  $('lookup').addEventListener('submit', lookup);
+  $('save').addEventListener('click', save);
+  $('refresh').addEventListener('click', function () { if (state.selected) runLookup(state.selected, true); });
+  $('notes').addEventListener('input', markDirty);
+  $('chkMine').addEventListener('change', markDirty);
+  $('chkCom').addEventListener('change', markDirty);
+  document.querySelectorAll('[data-vote]').forEach(function (btn) {
+    btn.addEventListener('click', function () { state.vote = btn.getAttribute('data-vote'); markDirty(); renderVotes(); });
+  });
+  document.querySelectorAll('[data-tab]').forEach(function (btn) {
+    btn.addEventListener('click', function () { state.tab = btn.getAttribute('data-tab'); renderTabs(); renderList(); });
+  });
+
+  renderAll(false);
+  loadList();
+})();
+</script>
+</body>
+</html>
