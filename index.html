@@ -17,6 +17,9 @@
   --blue-fg: #1F4E8C; --blue-bg: #E3ECF8;
   --warn-bg: #F6E8C3; --warn-fg: #5A4210; --no-bg: #F6DCDC; --no-fg: #7A1F1F; --abs-bg: #E4E8E5; --abs-fg: #3B4740;
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
+  --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
+  --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
+  --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
@@ -28,6 +31,9 @@
     --blue-fg: #A9C8F5; --blue-bg: #1B2D47;
     --warn-bg: #3A3015; --warn-fg: #F0D98F; --no-bg: #3D1F1F; --no-fg: #F2B6B6; --abs-bg: #26332C; --abs-fg: #C7D4CC;
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
+    --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
+    --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
+    --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
   }
 }
@@ -58,7 +64,7 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 
   flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
   background: var(--surface); border: 1px solid var(--field); border-radius: 8px;
 }
-.btn { height: 46px; padding: 0 20px; font-weight: 700; border: 0; border-radius: 8px; background: var(--green); color: var(--green-fg); }
+.btn { height: 46px; padding: 0 20px; font-weight: 700; border: 0; border-radius: 8px; background: var(--btn-blue); color: var(--btn-blue-fg); }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .btn.small { height: 40px; padding: 0 16px; }
 .btn.ghost { background: transparent; color: var(--blue-fg); border: 1px solid var(--blue-fg); }
@@ -67,15 +73,15 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 
 main { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 main .in { padding-block: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-h2 { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.25; text-wrap: balance; }
-h3 { margin: 0; font-family: var(--font-display); font-size: 18px; }
+h2 { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.25; text-wrap: balance; color: var(--green); }
+h3 { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--green); }
 .status { align-self: flex-start; margin: 0; font-size: 14px; font-weight: 700; color: var(--blue-fg); background: var(--blue-bg); border-radius: 12px; padding: 4px 12px; }
 .summary { margin: 0; white-space: pre-line; }
 .hint { margin: 0; color: var(--muted); }
 .sections { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 details { border-bottom: 1px solid var(--line); }
 details:last-child { border-bottom: 0; }
-summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; color: var(--green); }
 details p { margin: 0 0 14px; white-space: pre-line; color: var(--muted); }
 .lbl { font-size: 14px; font-weight: 700; }
 textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; resize: vertical; }
@@ -85,7 +91,11 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .listhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .listhead span { font-size: 14px; color: var(--muted); }
 #list { display: flex; flex-direction: column; gap: 8px; }
-.row { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.row { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0; padding: 8px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 8px solid var(--bar-und); border-radius: 12px; }
+.row.v-yes { border-left-color: var(--bar-yes); }
+.row.v-no { border-left-color: var(--bar-no); }
+.row.v-und { border-left-color: var(--bar-und); }
+.row.v-abs { border-left-color: var(--bar-abs); }
 .row[aria-current="true"] { border-color: var(--green); background: var(--green-soft); }
 .rt { font-weight: 700; }
 .rs { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
@@ -100,7 +110,11 @@ footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-
 footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 .votes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .votes button { height: 44px; padding: 0; font-size: 15px; font-weight: 600; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
-.votes button[aria-pressed="true"] { background: var(--green); color: var(--green-fg); border-color: var(--green); font-weight: 700; }
+.votes button[aria-pressed="true"] { color: var(--sel-fg); font-weight: 700; }
+.votes button[aria-pressed="true"][data-vote="Yes"] { background: var(--sel-yes); border-color: var(--sel-yes); }
+.votes button[aria-pressed="true"][data-vote="No"] { background: var(--sel-no); border-color: var(--sel-no); }
+.votes button[aria-pressed="true"][data-vote="Undecided"] { background: var(--sel-und); border-color: var(--sel-und); }
+.votes button[aria-pressed="true"][data-vote="Abstain"] { background: var(--sel-abs); border-color: var(--sel-abs); }
 #save { width: 100%; }
 #savestat { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
 .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -115,7 +129,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   <div class="in">
     <div class="brand"><h1>Bill Tracker</h1><span>Missouri General Assembly</span></div>
     <form id="lookup" autocomplete="off">
-      <input id="billnum" type="text" aria-label="Bill number" placeholder="HB 2600" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <input id="billnum" type="text" aria-label="Bill number" placeholder="2600 (SB 975 for Senate)" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
       <button class="btn" id="go" type="submit">Look up</button>
     </form>
     <p id="msg" role="status" hidden></p>
@@ -146,7 +160,6 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
       <textarea id="notes" rows="5" aria-label="Notes" placeholder="Why you lean this way, who you talked to, constituent input"></textarea>
       <div class="lbl">Save to</div>
       <div class="checks">
-        <label><input type="checkbox" checked disabled> All bills</label>
         <label><input type="checkbox" id="chkMine"> My bills</label>
         <label><input type="checkbox" id="chkCom"> Professional Registration</label>
       </div>
@@ -244,7 +257,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   function emptyMessage() {
     if (state.loadError) return 'Saved bills could not be loaded.';
     if (!state.loaded) return 'Loading saved bills.';
-    return 'No bills saved yet. Type a bill number above, like HB 2600.';
+    return 'No bills saved yet. Type a bill number above, like 2600. For a Senate bill, type SB 975.';
   }
 
   // ---------- drawing ----------
@@ -285,17 +298,13 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     }
     ids.forEach(function (id) {
       var b = state.bills.get(id);
-      var btn = h('button', 'row');
+      var vcls = b.vote === 'Yes' ? 'v-yes' : b.vote === 'No' ? 'v-no' : b.vote === 'Abstain' ? 'v-abs' : 'v-und';
+      var btn = h('button', 'row ' + vcls);
       btn.type = 'button';
       btn.setAttribute('aria-current', id === state.selected ? 'true' : 'false');
-      btn.appendChild(h('span', 'rt', b.number + (b.title ? ': ' + b.title : '')));
-      var sub = b.notes ? b.notes : b.status;
-      if (sub) btn.appendChild(h('span', 'rs', sub.length > 90 ? sub.slice(0, 90) + '...' : sub));
-      var chips = h('span', 'chips');
-      chips.appendChild(h('span', voteClass(b.vote), b.vote));
-      if (b.mine) chips.appendChild(h('span', 'chip tag', 'My bills'));
-      if (b.committee) chips.appendChild(h('span', 'chip tag', 'Prof. Reg.'));
-      btn.appendChild(chips);
+      btn.setAttribute('aria-label', b.number + (b.title ? ', ' + b.title : '') + '. Vote: ' + b.vote);
+      btn.appendChild(h('span', 'rt', b.number));
+      if (b.title) btn.appendChild(h('span', 'rs', b.title));
       btn.addEventListener('click', function () { select(id); });
       box.appendChild(btn);
     });
@@ -407,8 +416,9 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   function lookup(e) {
     e.preventDefault();
     var id = norm($('billnum').value);
+    if (/^\d{1,5}$/.test(id)) id = 'HB' + id;
     if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
-      showMsg('Type a bill number like HB 2600 or SB 975.', null, null, true);
+      showMsg('Type the digits for a House bill, like 2600. For a Senate bill, type SB first, like SB 975.', null, null, true);
       return;
     }
     $('billnum').value = disp(id);
