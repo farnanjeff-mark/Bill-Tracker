@@ -19,6 +19,7 @@
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
   --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
   --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
+  --home-bg: #E6D8C3; --shadow: rgba(60, 40, 15, 0.28);
   --navbar: #1F5FAD; --tab-bg: #FFFFFF; --tab-fg: #1F5FAD; --tab-on-bg: #1F7A50; --tab-on-fg: #FFFFFF;
   --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -34,6 +35,7 @@
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
     --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
     --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
+    --home-bg: #2B241B; --shadow: rgba(0, 0, 0, 0.55);
     --navbar: #1B3A66; --tab-bg: #E8EFEA; --tab-fg: #12315C; --tab-on-bg: #4FB985; --tab-on-fg: #0B1410;
     --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
@@ -94,6 +96,18 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .listhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .listhead span { font-size: 14px; color: var(--muted); }
 #list { display: flex; flex-direction: column; gap: 8px; }
+.stagelist { display: flex; flex-direction: column; }
+.stagerow { padding: 4px 0 8px; border-bottom: 1px solid var(--line); }
+.stagerow:last-child { border-bottom: 0; }
+.stagerow label { min-height: 44px; display: flex; align-items: center; gap: 12px; }
+.stagerow input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); margin: 0; }
+.dt { display: flex; gap: 8px; padding-left: 34px; }
+.dt input { flex: 1 1 0; min-width: 0; height: 40px; padding: 0 8px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+.rd { font-size: 14px; font-weight: 700; color: var(--blue-fg); }
+.grouphead { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; padding-bottom: 4px; border-bottom: 2px solid var(--green); }
+.grouphead:first-child { margin-top: 0; }
+.grouphead h4 { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--green); }
+.gcount { font-size: 20px; font-weight: 700; color: var(--green); }
 .row { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0; padding: 8px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 8px solid var(--bar-und); border-radius: 12px; }
 .row.v-yes { border-left-color: var(--bar-yes); }
 .row.v-no { border-left-color: var(--bar-no); }
@@ -111,10 +125,16 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .chip.tag { background: var(--blue-bg); color: var(--blue-fg); }
 footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .menu { display: flex; flex-direction: column; gap: 10px; }
-.menu-btn { min-height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; border: 0; border-radius: 10px; background: var(--btn-blue); color: var(--btn-blue-fg); font-size: 17px; font-weight: 700; text-align: left; }
-.menu-btn .ml { display: flex; flex-direction: column; }
-.menu-btn small { font-size: 14px; font-weight: 400; }
-.menu-btn .mn { min-width: 30px; height: 26px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; border-radius: 13px; background: var(--btn-blue-fg); color: var(--btn-blue); font-size: 15px; font-weight: 700; }
+.menu-btn { min-height: 76px; display: flex; align-items: center; gap: 14px; padding: 8px 18px; border: 2px solid var(--btn-blue); border-radius: 12px; background: var(--tab-bg); color: var(--tab-fg); font-size: 18px; font-weight: 700; text-align: left; box-shadow: 0 4px 10px var(--shadow); }
+.menu-btn .mi { flex: 0 0 auto; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.menu-btn .mi.i-all { stroke: #1F5FAD; fill: #BFD6F5; }
+.menu-btn .mi.i-my { stroke: #A8740A; fill: #F6C645; }
+.menu-btn .mi.i-com { stroke: #1F5C45; fill: #7CCB9E; }
+.menu-btn .ml { flex: 1 1 auto; min-width: 0; }
+.menu-btn .mn { flex: 0 0 auto; font-size: 34px; line-height: 1; font-weight: 700; }
+.menu-btn:active { transform: translateY(1px); box-shadow: 0 2px 5px var(--shadow); }
+body[data-view="home"] main { background: var(--home-bg); }
+#menu { background: transparent; border: 0; padding: 0; }
 footer #savestat.in { display: block; padding-top: 6px; padding-bottom: 6px; }
 footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
 .bar { background: var(--navbar); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -155,9 +175,18 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     <section class="card" id="menu">
       <h2>Bill lists</h2>
       <div class="menu">
-        <button type="button" class="menu-btn" data-go="all"><span class="ml">All bills</span><span class="mn" data-count="all">0</span></button>
-        <button type="button" class="menu-btn" data-go="my"><span class="ml">My bills</span><span class="mn" data-count="my">0</span></button>
-        <button type="button" class="menu-btn" data-go="committee"><span class="ml">Professional Registration</span><span class="mn" data-count="committee">0</span></button>
+        <button type="button" class="menu-btn" data-go="all">
+          <svg class="mi i-all" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+          <span class="ml">All bills</span><span class="mn" data-count="all">0</span>
+        </button>
+        <button type="button" class="menu-btn" data-go="my">
+          <svg class="mi i-my" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.3 9.4l6-.9z"/></svg>
+          <span class="ml">My bills</span><span class="mn" data-count="my">0</span>
+        </button>
+        <button type="button" class="menu-btn" data-go="committee">
+          <svg class="mi i-com" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.6L7 21l5-2.8 5 2.8-1.7-7.4"/></svg>
+          <span class="ml">Professional Registration</span><span class="mn" data-count="committee">0</span>
+        </button>
       </div>
     </section>
 
@@ -193,6 +222,16 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
         <label><input type="checkbox" id="chkMine"> My bills</label>
         <label><input type="checkbox" id="chkCom"> Professional Registration</label>
       </div>
+      <div id="myStageBox" hidden>
+        <div class="lbl">My bill stage</div>
+        <div class="stagelist" id="myStageList"></div>
+        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and time for any stage.</p>
+      </div>
+      <div id="stageBox" hidden>
+        <div class="lbl">Professional Registration stage</div>
+        <div class="stagelist" id="comStageList"></div>
+        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and time for any stage.</p>
+      </div>
     </section>
 
     <section id="listWrap" hidden>
@@ -211,8 +250,16 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   // The Google Apps Script web app that looks bills up and stores your votes and notes.
   var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
 
+  var STAGES = ['Hearing Scheduled', 'Waiting for Hearing', 'Bills Up for Vote', 'Passed'];
+  var MY_STAGES = ['Hearing Scheduled', 'Hearing Held', 'Executive Session', 'In Rules', 'Ready for Floor'];
+  // One set per group of bills: the field it saves to, its stages, and where it shows on the bill page.
+  var STAGE_SETS = [
+    { prefix: 'm', field: 'mystage', stages: MY_STAGES, list: 'myStageList', box: 'myStageBox', flag: 'chkMine', tab: 'my' },
+    { prefix: 'c', field: 'stage', stages: STAGES, list: 'comStageList', box: 'stageBox', flag: 'chkCom', tab: 'committee' }
+  ];
+
   var state = {
-    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided',
+    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided', stage: '', mystage: '', dates: {},
     dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
@@ -235,7 +282,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     return {
       number: s(b.number), title: s(b.title), status: s(b.status), summary: s(b.summary),
       proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
-      vote: s(b.vote) || 'Undecided', notes: s(b.notes), mine: mine, committee: com
+      vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
+      dates: (b.dates && typeof b.dates === 'object') ? b.dates : {}, notes: s(b.notes), mine: mine, committee: com
     };
   }
 
@@ -311,7 +359,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       box.appendChild(h('p', 'hint', t));
       return;
     }
-    ids.forEach(function (id) {
+    function rowFor(id, dateKey) {
       var b = state.bills.get(id);
       var vcls = b.vote === 'Yes' ? 'v-yes' : b.vote === 'No' ? 'v-no' : b.vote === 'Abstain' ? 'v-abs' : 'v-und';
       var btn = h('button', 'row ' + vcls);
@@ -320,9 +368,31 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       btn.setAttribute('aria-label', b.number + (b.title ? ', ' + b.title : '') + '. Vote: ' + b.vote);
       btn.appendChild(h('span', 'rt', b.number));
       if (b.title) btn.appendChild(h('span', 'rs', b.title));
+      var when = dateKey ? fmtDT(b.dates && b.dates[dateKey]) : '';
+      if (when) btn.appendChild(h('span', 'rd', when));
       btn.addEventListener('click', function () { select(id); });
-      box.appendChild(btn);
-    });
+      return btn;
+    }
+    var set = STAGE_SETS.filter(function (s) { return s.tab === state.tab; })[0];
+    if (set) {
+      // My bills and Professional Registration: headings, with each bill under its stage.
+      var groups = [{ key: '', title: 'Bills' }].concat(set.stages.map(function (n) { return { key: n, title: n }; }));
+      groups.forEach(function (g) {
+        var gi = ids.filter(function (id) {
+          var s = state.bills.get(id)[set.field] || '';
+          if (set.stages.indexOf(s) < 0) s = '';
+          return s === g.key;
+        }).sort(byNumber);
+        var head = h('div', 'grouphead');
+        head.appendChild(h('h4', '', g.title));
+        head.appendChild(h('span', 'gcount', String(gi.length)));
+        box.appendChild(head);
+        if (!gi.length) box.appendChild(h('p', 'hint', 'No bills'));
+        gi.forEach(function (id) { box.appendChild(rowFor(id, g.key ? set.prefix + ':' + g.key : '')); });
+      });
+      return;
+    }
+    ids.forEach(function (id) { box.appendChild(rowFor(id)); });
   }
 
   function renderVotes() {
@@ -336,13 +406,99 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('notes').value = b.notes || '';
     $('chkMine').checked = !!b.mine;
     $('chkCom').checked = !!b.committee;
+    state.stage = STAGES.indexOf(b.stage) >= 0 ? b.stage : '';
+    state.mystage = MY_STAGES.indexOf(b.mystage) >= 0 ? b.mystage : '';
+    state.dates = JSON.parse(JSON.stringify(b.dates || {}));
     state.dirty = false;
     renderVotes();
+    renderStage();
+  }
+
+  // Build the stage rows (a checkbox plus a date and a time box) once, when the page opens.
+  function buildStageRows() {
+    STAGE_SETS.forEach(function (set) {
+      var list = $(set.list);
+      set.stages.forEach(function (name) {
+        var key = set.prefix + ':' + name;
+        var row = h('div', 'stagerow');
+        var label = h('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.setAttribute('data-set', set.prefix);
+        cb.setAttribute('data-name', name);
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(name));
+        row.appendChild(label);
+        var dt = h('div', 'dt');
+        [['d', 'date', ' date'], ['t', 'time', ' time']].forEach(function (k) {
+          var inp = document.createElement('input');
+          inp.type = k[1];
+          inp.setAttribute('data-key', key);
+          inp.setAttribute('data-kind', k[0]);
+          inp.setAttribute('aria-label', name + k[2]);
+          inp.addEventListener('change', function () {
+            var cur = state.dates[key] || { d: '', t: '' };
+            cur[k[0]] = inp.value;
+            if (cur.d || cur.t) state.dates[key] = cur; else delete state.dates[key];
+            markDirty();
+            flush();
+          });
+          dt.appendChild(inp);
+        });
+        row.appendChild(dt);
+        list.appendChild(row);
+        cb.addEventListener('change', function () {
+          state[set.field] = cb.checked ? name : '';
+          renderStage();
+          markDirty();
+          flush();
+        });
+      });
+    });
+  }
+
+  function renderStage() {
+    STAGE_SETS.forEach(function (set) {
+      $(set.box).hidden = !$(set.flag).checked;
+    });
+    document.querySelectorAll('input[data-name]').forEach(function (cb) {
+      var set = STAGE_SETS.filter(function (s) { return s.prefix === cb.getAttribute('data-set'); })[0];
+      cb.checked = state[set.field] === cb.getAttribute('data-name');
+    });
+    document.querySelectorAll('input[data-key]').forEach(function (inp) {
+      var cur = state.dates[inp.getAttribute('data-key')];
+      inp.value = (cur && cur[inp.getAttribute('data-kind')]) || '';
+    });
+  }
+
+  function fmtDT(x) {
+    if (!x) return '';
+    var out = [];
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(x.d || '');
+    if (m) {
+      out.push(new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }));
+    }
+    var t = /^(\d{2}):(\d{2})$/.exec(x.t || '');
+    if (t) {
+      out.push(new Date(2000, 0, 1, +t[1], +t[2]).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+    }
+    return out.join(', ');
+  }
+
+  function byNumber(a, b) {
+    function key(id) {
+      var m = /^([A-Z]+)(\d+)$/.exec(id);
+      return m ? [m[1], parseInt(m[2], 10)] : [id, 0];
+    }
+    var x = key(a), y = key(b);
+    if (x[0] !== y[0]) return x[0] < y[0] ? -1 : 1;
+    return x[1] - y[1];
   }
 
   function renderDetail(force) {
     var b = state.selected ? state.bills.get(state.selected) : null;
     var v = state.view;
+    document.body.setAttribute('data-view', v);
     var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration' };
     $('lookup').hidden = v !== 'home';
     $('homeBtn').hidden = v === 'home';
@@ -493,7 +649,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var b = state.bills.get(state.selected);
     return {
       action: 'save', number: b.number, vote: state.vote, notes: $('notes').value,
-      mine: $('chkMine').checked, committee: $('chkCom').checked
+      mine: $('chkMine').checked, committee: $('chkCom').checked, stage: state.stage,
+      mystage: state.mystage, dates: JSON.parse(JSON.stringify(state.dates))
     };
   }
 
@@ -560,8 +717,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('refresh').addEventListener('click', function () { if (state.selected) runLookup(state.selected, true); });
   $('notes').addEventListener('input', scheduleSave);
   $('notes').addEventListener('blur', flush);
-  $('chkMine').addEventListener('change', function () { markDirty(); flush(); });
-  $('chkCom').addEventListener('change', function () { markDirty(); flush(); });
+  $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
+  $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
+  buildStageRows();
   document.querySelectorAll('[data-vote]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (!state.selected) return;
