@@ -19,6 +19,7 @@
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
   --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
   --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
+  --navbar: #1F5FAD; --tab-bg: #FFFFFF; --tab-fg: #1F5FAD; --tab-on-bg: #1F7A50; --tab-on-fg: #FFFFFF;
   --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -33,11 +34,13 @@
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
     --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
     --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
+    --navbar: #1B3A66; --tab-bg: #E8EFEA; --tab-fg: #12315C; --tab-on-bg: #4FB985; --tab-on-fg: #0B1410;
     --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
   }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { height: 100%; }
 body {
   margin: 0; height: 100%; height: 100dvh; display: flex; flex-direction: column;
@@ -64,14 +67,14 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 
   flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
   background: var(--surface); border: 1px solid var(--field); border-radius: 8px;
 }
-.btn { height: 46px; padding: 0 20px; font-weight: 700; border: 0; border-radius: 8px; background: var(--btn-blue); color: var(--btn-blue-fg); }
+.btn { height: 46px; padding: 0 20px; white-space: nowrap; font-weight: 700; border: 0; border-radius: 8px; background: var(--btn-blue); color: var(--btn-blue-fg); }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .btn.small { height: 40px; padding: 0 16px; }
 .btn.ghost { background: transparent; color: var(--blue-fg); border: 1px solid var(--blue-fg); }
 #msg { margin: 0; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 #msg.err { background: var(--err-bg); color: var(--err-fg); padding: 8px 12px; border-radius: 8px; }
 main { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-main .in { padding-block: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+main .in { padding-block: 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 h2 { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.25; text-wrap: balance; color: var(--green); }
 h3 { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--green); }
@@ -107,9 +110,18 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .chip.abs { background: var(--abs-bg); color: var(--abs-fg); }
 .chip.tag { background: var(--blue-bg); color: var(--blue-fg); }
 footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.menu { display: flex; flex-direction: column; gap: 10px; }
+.menu-btn { min-height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; border: 0; border-radius: 10px; background: var(--btn-blue); color: var(--btn-blue-fg); font-size: 17px; font-weight: 700; text-align: left; }
+.menu-btn .ml { display: flex; flex-direction: column; }
+.menu-btn small { font-size: 14px; font-weight: 400; }
+.menu-btn .mn { min-width: 30px; height: 26px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; border-radius: 13px; background: var(--btn-blue-fg); color: var(--btn-blue); font-size: 15px; font-weight: 700; }
+footer #savestat.in { display: block; padding-top: 6px; padding-bottom: 6px; }
+footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+.bar { background: var(--navbar); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.bar .in.tabs { flex-direction: row; gap: 6px; padding-top: 10px; padding-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
+.bar .in.tabs::-webkit-scrollbar { display: none; }
 .votes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.votes button { height: 44px; padding: 0; font-size: 15px; font-weight: 600; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+.votes button { height: 44px; padding: 0 2px; font-size: 14px; font-weight: 600; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
 .votes button[aria-pressed="true"] { color: var(--sel-fg); font-weight: 700; }
 .votes button[aria-pressed="true"][data-vote="Yes"] { background: var(--sel-yes); border-color: var(--sel-yes); }
 .votes button[aria-pressed="true"][data-vote="No"] { background: var(--sel-no); border-color: var(--sel-no); }
@@ -117,19 +129,21 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 .votes button[aria-pressed="true"][data-vote="Abstain"] { background: var(--sel-abs); border-color: var(--sel-abs); }
 .votes button:disabled { opacity: 0.5; cursor: not-allowed; }
 #savestat { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.tabs button { height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; background: transparent; border: 0; border-top: 3px solid transparent; color: var(--muted); font-size: 15px; font-weight: 600; }
-.tabs .n { font-size: 14px; font-weight: 400; }
-.tabs button[aria-pressed="true"] { color: var(--green); border-top-color: var(--green); font-weight: 700; }
+.tabs button { flex: 1 0 auto; height: 44px; padding: 0 10px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: var(--tab-bg); color: var(--tab-fg); border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; }
+.tabs .n { min-width: 24px; height: 22px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; background: var(--tab-fg); color: var(--tab-bg); font-size: 14px; font-weight: 700; }
+.tabs button[aria-pressed="true"] { background: var(--tab-on-bg); color: var(--tab-on-fg); font-weight: 700; }
+.tabs button[aria-pressed="true"] .n { background: var(--tab-on-fg); color: var(--tab-on-bg); }
+.tabs button:focus-visible { outline-color: var(--tab-bg); }
 </style>
 </head>
 <body>
 
 <div class="band top">
   <div class="in">
-    <div class="brand"><h1>Bill Tracker</h1><span>Missouri General Assembly</span></div>
+    <div class="brand"><h1>Bill Tracker</h1><button class="btn small" id="homeBtn" type="button" hidden>Home</button></div>
+    <button class="btn small ghost" id="backBtn" type="button" hidden>Back to list</button>
     <form id="lookup" autocomplete="off">
-      <input id="billnum" type="text" aria-label="Bill number" placeholder="2600 (SB 975 for Senate)" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <input id="billnum" type="text" aria-label="Bill number" placeholder="2600 or SB 975" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
       <button class="btn" id="go" type="submit">Look up</button>
     </form>
     <p id="msg" role="status" hidden></p>
@@ -138,7 +152,16 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 
 <main id="main">
   <div class="in">
-    <section class="card" id="empty">
+    <section class="card" id="menu">
+      <h2>Bill lists</h2>
+      <div class="menu">
+        <button type="button" class="menu-btn" data-go="all"><span class="ml">All bills</span><span class="mn" data-count="all">0</span></button>
+        <button type="button" class="menu-btn" data-go="my"><span class="ml">My bills</span><span class="mn" data-count="my">0</span></button>
+        <button type="button" class="menu-btn" data-go="committee"><span class="ml">Professional Registration</span><span class="mn" data-count="committee">0</span></button>
+      </div>
+    </section>
+
+    <section class="card" id="empty" hidden>
       <p class="hint" id="emptyText">Loading saved bills.</p>
     </section>
 
@@ -156,7 +179,14 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     </section>
 
     <section class="card" id="noteCard" hidden>
-      <h3>Your notes</h3>
+      <h3>My decision</h3>
+      <div class="votes" role="group" aria-label="Your vote">
+        <button type="button" data-vote="Yes" aria-pressed="false">Yes</button>
+        <button type="button" data-vote="No" aria-pressed="false">No</button>
+        <button type="button" data-vote="Undecided" aria-pressed="true">Undecided</button>
+        <button type="button" data-vote="Abstain" aria-pressed="false">Abstain</button>
+      </div>
+      <div class="lbl">Notes</div>
       <textarea id="notes" rows="5" aria-label="Notes" placeholder="Why you lean this way, who you talked to, constituent input"></textarea>
       <div class="lbl">Save to</div>
       <div class="checks">
@@ -165,28 +195,15 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
       </div>
     </section>
 
-    <section>
+    <section id="listWrap" hidden>
       <div class="listhead"><h3 id="listTitle">All bills</h3><span id="listCount"></span></div>
       <div id="list"></div>
     </section>
   </div>
 </main>
 
-<footer class="band">
-  <div class="in">
-    <div class="votes" role="group" aria-label="Your vote">
-      <button type="button" data-vote="Yes" aria-pressed="false">Yes</button>
-      <button type="button" data-vote="No" aria-pressed="false">No</button>
-      <button type="button" data-vote="Undecided" aria-pressed="true">Undecided</button>
-      <button type="button" data-vote="Abstain" aria-pressed="false">Abstain</button>
-    </div>
-    <p id="savestat" role="status" aria-live="polite" hidden></p>
-    <div class="tabs" role="group" aria-label="Bill groups">
-      <button type="button" data-tab="all" aria-label="All bills" aria-pressed="true"><span>All bills</span><span class="n">0</span></button>
-      <button type="button" data-tab="my" aria-label="My bills" aria-pressed="false"><span>My bills</span><span class="n">0</span></button>
-      <button type="button" data-tab="committee" aria-label="Professional Registration" aria-pressed="false"><span>Prof. Reg.</span><span class="n">0</span></button>
-    </div>
-  </div>
+<footer class="band" id="foot" hidden>
+  <p id="savestat" class="in" role="status" aria-live="polite"></p>
 </footer>
 
 <script>
@@ -195,7 +212,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
 
   var state = {
-    bills: new Map(), order: [], selected: null, tab: 'all', vote: 'Undecided',
+    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided',
     dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
@@ -275,10 +292,8 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
       my: all.filter(function (b) { return b.mine; }).length,
       committee: all.filter(function (b) { return b.committee; }).length
     };
-    document.querySelectorAll('[data-tab]').forEach(function (btn) {
-      var t = btn.getAttribute('data-tab');
-      btn.setAttribute('aria-pressed', String(t === state.tab));
-      btn.querySelector('.n').textContent = String(counts[t]);
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      el.textContent = String(counts[el.getAttribute('data-count')]);
     });
   }
 
@@ -291,7 +306,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     $('listCount').textContent = ids.length + (ids.length === 1 ? ' bill' : ' bills');
     if (!ids.length) {
       var t = !state.loaded || state.loadError ? emptyMessage()
-        : state.tab === 'all' ? 'No bills saved yet.'
+        : state.tab === 'all' ? 'No bills saved yet. Go Home and type a bill number.'
         : 'Nothing here yet. Open a bill, tick ' + names[state.tab] + ', and save.';
       box.appendChild(h('p', 'hint', t));
       return;
@@ -327,14 +342,27 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 
   function renderDetail(force) {
     var b = state.selected ? state.bills.get(state.selected) : null;
-    $('detail').hidden = !b;
-    $('noteCard').hidden = !b;
-    $('empty').hidden = !!b;
+    var v = state.view;
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration' };
+    $('lookup').hidden = v !== 'home';
+    $('homeBtn').hidden = v === 'home';
+    $('backBtn').hidden = v !== 'bill';
+    $('backBtn').textContent = 'Back to ' + names[state.tab];
+    $('foot').hidden = v !== 'bill' || !$('savestat').textContent;
+    $('menu').hidden = v !== 'home';
+    $('listWrap').hidden = v !== 'list';
+    $('detail').hidden = !b || v !== 'bill';
+    $('noteCard').hidden = !b || v !== 'bill';
+    $('empty').hidden = !!b || v !== 'bill';
     document.querySelectorAll('[data-vote]').forEach(function (btn) { btn.disabled = !b; });
     $('chkMine').disabled = !b;
     $('chkCom').disabled = !b;
     $('refresh').disabled = !b || state.busy;
-    if (!b) { $('emptyText').textContent = emptyMessage(); return; }
+    if (!b) {
+      $('emptyText').textContent = state.order.length && state.loaded && !state.loadError
+        ? 'No bill is open. Go back to the list or Home.' : emptyMessage();
+      return;
+    }
     $('dTitle').textContent = b.number + (b.title ? ': ' + b.title : '');
     var st = $('dStatus');
     st.textContent = b.status;
@@ -356,9 +384,28 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 
   function select(id) {
     flush();
+    state.view = 'bill';
     state.selected = id;
     state.dirty = false;
     renderAll(true);
+    $('main').scrollTop = 0;
+  }
+
+  function goHome() {
+    flush();
+    state.view = 'home';
+    state.dirty = false;
+    if (!state.saveErr && !state.loadError) showMsg('');
+    renderAll(false);
+    $('main').scrollTop = 0;
+  }
+
+  function goList(tab) {
+    flush();
+    state.view = 'list';
+    if (tab) state.tab = tab;
+    state.dirty = false;
+    renderAll(false);
     $('main').scrollTop = 0;
   }
 
@@ -381,7 +428,6 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
         if (id && !state.bills.has(id)) { state.bills.set(id, b); state.order.push(id); }
       });
       state.loaded = true;
-      if (!state.selected && state.order.length) state.selected = state.order[0];
       showMsg('');
       renderAll(true);
     }).catch(function (err) {
@@ -440,7 +486,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   function setStat(t) {
     var s = $('savestat');
     s.textContent = t;
-    s.hidden = !t;
+    $('foot').hidden = !t || state.view !== 'bill';
   }
 
   function buildPayload() {
@@ -527,8 +573,10 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   });
   document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
   window.addEventListener('pagehide', flush);
-  document.querySelectorAll('[data-tab]').forEach(function (btn) {
-    btn.addEventListener('click', function () { state.tab = btn.getAttribute('data-tab'); renderTabs(); renderList(); });
+  $('homeBtn').addEventListener('click', goHome);
+  $('backBtn').addEventListener('click', function () { goList(); });
+  document.querySelectorAll('[data-go]').forEach(function (btn) {
+    btn.addEventListener('click', function () { goList(btn.getAttribute('data-go')); });
   });
 
   renderAll(false);
