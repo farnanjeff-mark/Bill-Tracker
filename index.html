@@ -115,7 +115,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 .votes button[aria-pressed="true"][data-vote="No"] { background: var(--sel-no); border-color: var(--sel-no); }
 .votes button[aria-pressed="true"][data-vote="Undecided"] { background: var(--sel-und); border-color: var(--sel-und); }
 .votes button[aria-pressed="true"][data-vote="Abstain"] { background: var(--sel-abs); border-color: var(--sel-abs); }
-#save { width: 100%; }
+.votes button:disabled { opacity: 0.5; cursor: not-allowed; }
 #savestat { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
 .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .tabs button { height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; background: transparent; border: 0; border-top: 3px solid transparent; color: var(--muted); font-size: 15px; font-weight: 600; }
@@ -180,7 +180,6 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
       <button type="button" data-vote="Undecided" aria-pressed="true">Undecided</button>
       <button type="button" data-vote="Abstain" aria-pressed="false">Abstain</button>
     </div>
-    <button class="btn" id="save" type="button" disabled>Save vote and notes</button>
     <p id="savestat" role="status" aria-live="polite" hidden></p>
     <div class="tabs" role="group" aria-label="Bill groups">
       <button type="button" data-tab="all" aria-label="All bills" aria-pressed="true"><span>All bills</span><span class="n">0</span></button>
@@ -197,7 +196,8 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 
   var state = {
     bills: new Map(), order: [], selected: null, tab: 'all', vote: 'Undecided',
-    dirty: false, loaded: false, loadError: false, busy: false, saving: false
+    dirty: false, loaded: false, loadError: false, busy: false, saving: false,
+    queue: [], timer: null, saveErr: false
   };
 
   function $(id) { return document.getElementById(id); }
@@ -330,7 +330,9 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     $('detail').hidden = !b;
     $('noteCard').hidden = !b;
     $('empty').hidden = !!b;
-    $('save').disabled = !b || state.saving;
+    document.querySelectorAll('[data-vote]').forEach(function (btn) { btn.disabled = !b; });
+    $('chkMine').disabled = !b;
+    $('chkCom').disabled = !b;
     $('refresh').disabled = !b || state.busy;
     if (!b) { $('emptyText').textContent = emptyMessage(); return; }
     $('dTitle').textContent = b.number + (b.title ? ': ' + b.title : '');
@@ -343,7 +345,7 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     $('sQuestions').textContent = b.questions || none;
     $('sProcess').textContent = b.process || none;
     $('sAmend').textContent = b.amend || none;
-    if (force || !state.dirty) fillForm(b);
+    if (force || (!state.dirty && !state.saving && !state.queue.length)) fillForm(b);
   }
 
   function renderAll(forceForm) {
@@ -353,9 +355,9 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
   }
 
   function select(id) {
+    flush();
     state.selected = id;
     state.dirty = false;
-    $('savestat').hidden = true;
     renderAll(true);
     $('main').scrollTop = 0;
   }
@@ -392,6 +394,13 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
 
   function runLookup(id, refresh) {
     if (state.busy) return;
+    if (refresh) {
+      flush();
+      if (state.saving || state.queue.length) {
+        showMsg('Saving your changes first. Try again in a moment.');
+        return;
+      }
+    }
     setBusy(true);
     showMsg('Looking up ' + disp(id) + '. This can take up to a minute.');
     api({ action: 'lookup', number: disp(id), refresh: !!refresh }).then(function (j) {
@@ -426,42 +435,98 @@ footer .in { padding-top: 10px; display: flex; flex-direction: column; gap: 8px;
     runLookup(id, false);
   }
 
-  function save() {
-    if (!state.selected || state.saving) return;
+  // ---------- autosave ----------
+
+  function setStat(t) {
+    var s = $('savestat');
+    s.textContent = t;
+    s.hidden = !t;
+  }
+
+  function buildPayload() {
     var b = state.bills.get(state.selected);
-    state.saving = true;
-    $('save').disabled = true;
-    var stat = $('savestat');
-    stat.textContent = 'Saving.';
-    stat.hidden = false;
-    api({
+    return {
       action: 'save', number: b.number, vote: state.vote, notes: $('notes').value,
       mine: $('chkMine').checked, committee: $('chkCom').checked
-    }).then(function (j) {
+    };
+  }
+
+  // Move any unsaved change into the send queue, then start sending.
+  function flush() {
+    clearTimeout(state.timer);
+    state.timer = null;
+    if (!state.dirty || !state.selected || !state.bills.get(state.selected)) return;
+    var p = buildPayload();
+    state.dirty = false;
+    var idx = state.queue.length - 1;
+    // Replace a waiting save for the same bill, but never the one already being sent.
+    if (idx >= (state.saving ? 1 : 0) && state.queue[idx].number === p.number) {
+      state.queue[idx] = p;
+    } else {
+      state.queue.push(p);
+    }
+    pump();
+  }
+
+  function pump() {
+    if (state.saving || !state.queue.length) return;
+    var p = state.queue[0];
+    state.saving = true;
+    setStat('Saving...');
+    var ok = false;
+    api(p).then(function (j) {
+      ok = true;
+      state.queue.shift();
       var nb = clean(j.bill);
-      state.bills.set(state.selected, nb);
-      state.dirty = false;
-      stat.textContent = 'Saved at ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      renderAll(false);
+      state.bills.set(norm(nb.number), nb);
+      if (state.saveErr) { state.saveErr = false; showMsg(''); }
+      if (state.queue.length || state.dirty) {
+        setStat('Saving...');
+      } else {
+        setStat('Saved at ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+      }
+      renderTabs();
+      renderList();
+      renderDetail(false);
     }).catch(function (err) {
-      stat.textContent = err.message;
+      state.saveErr = true;
+      setStat('Not saved');
+      showMsg('Not saved. ' + err.message, 'Try again', pump, true);
     }).then(function () {
       state.saving = false;
-      $('save').disabled = !state.selected;
+      if (ok) pump();
     });
   }
 
-  function markDirty() { state.dirty = true; $('savestat').hidden = true; }
+  function markDirty() {
+    if (!state.selected) return;
+    state.dirty = true;
+    setStat('Unsaved changes');
+  }
+
+  function scheduleSave() {
+    markDirty();
+    clearTimeout(state.timer);
+    state.timer = setTimeout(flush, 2000);
+  }
 
   $('lookup').addEventListener('submit', lookup);
-  $('save').addEventListener('click', save);
   $('refresh').addEventListener('click', function () { if (state.selected) runLookup(state.selected, true); });
-  $('notes').addEventListener('input', markDirty);
-  $('chkMine').addEventListener('change', markDirty);
-  $('chkCom').addEventListener('change', markDirty);
+  $('notes').addEventListener('input', scheduleSave);
+  $('notes').addEventListener('blur', flush);
+  $('chkMine').addEventListener('change', function () { markDirty(); flush(); });
+  $('chkCom').addEventListener('change', function () { markDirty(); flush(); });
   document.querySelectorAll('[data-vote]').forEach(function (btn) {
-    btn.addEventListener('click', function () { state.vote = btn.getAttribute('data-vote'); markDirty(); renderVotes(); });
+    btn.addEventListener('click', function () {
+      if (!state.selected) return;
+      state.vote = btn.getAttribute('data-vote');
+      renderVotes();
+      markDirty();
+      flush();
+    });
   });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
+  window.addEventListener('pagehide', flush);
   document.querySelectorAll('[data-tab]').forEach(function (btn) {
     btn.addEventListener('click', function () { state.tab = btn.getAttribute('data-tab'); renderTabs(); renderList(); });
   });
