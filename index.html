@@ -19,7 +19,7 @@
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
   --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
   --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
-  --home-bg: #E6D8C3; --shadow: rgba(60, 40, 15, 0.28);
+  --home-bg: #B7C7AA; --shadow: rgba(25, 45, 30, 0.30);
   --navbar: #1F5FAD; --tab-bg: #FFFFFF; --tab-fg: #1F5FAD; --tab-on-bg: #1F7A50; --tab-on-fg: #FFFFFF;
   --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -35,7 +35,7 @@
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
     --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
     --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
-    --home-bg: #2B241B; --shadow: rgba(0, 0, 0, 0.55);
+    --home-bg: #243024; --shadow: rgba(0, 0, 0, 0.55);
     --navbar: #1B3A66; --tab-bg: #E8EFEA; --tab-fg: #12315C; --tab-on-bg: #4FB985; --tab-on-fg: #0B1410;
     --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
@@ -125,7 +125,7 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .chip.tag { background: var(--blue-bg); color: var(--blue-fg); }
 footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .menu { display: flex; flex-direction: column; gap: 10px; }
-.menu-btn { min-height: 76px; display: flex; align-items: center; gap: 14px; padding: 8px 18px; border: 2px solid var(--btn-blue); border-radius: 12px; background: var(--tab-bg); color: var(--tab-fg); font-size: 18px; font-weight: 700; text-align: left; box-shadow: 0 4px 10px var(--shadow); }
+.menu-btn { min-height: 76px; display: flex; align-items: center; gap: 14px; padding: 8px 18px; border: 2px solid var(--btn-blue); border-radius: 12px; background: var(--tab-bg); color: var(--tab-fg); font-size: 18px; font-weight: 400; text-align: left; box-shadow: 0 4px 10px var(--shadow); }
 .menu-btn .mi { flex: 0 0 auto; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .menu-btn .mi.i-all { stroke: #1F5FAD; fill: #BFD6F5; }
 .menu-btn .mi.i-my { stroke: #A8740A; fill: #F6C645; }
@@ -177,11 +177,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <div class="menu">
         <button type="button" class="menu-btn" data-go="all">
           <svg class="mi i-all" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
-          <span class="ml">All bills</span><span class="mn" data-count="all">0</span>
+          <span class="ml">All Bills</span><span class="mn" data-count="all">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="my">
           <svg class="mi i-my" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.3 9.4l6-.9z"/></svg>
-          <span class="ml">My bills</span><span class="mn" data-count="my">0</span>
+          <span class="ml">My Bills</span><span class="mn" data-count="my">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="committee">
           <svg class="mi i-com" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.6L7 21l5-2.8 5 2.8-1.7-7.4"/></svg>
@@ -250,7 +250,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   // The Google Apps Script web app that looks bills up and stores your votes and notes.
   var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
 
-  var STAGES = ['Hearing Scheduled', 'Waiting for Hearing', 'Bills Up for Vote', 'Passed'];
+  var STAGES = ['Hearing Scheduled', 'Bills Up for Vote', 'Pass/Fail'];
   var MY_STAGES = ['Hearing Scheduled', 'Hearing Held', 'Executive Session', 'In Rules', 'Ready for Floor'];
   // One set per group of bills: the field it saves to, its stages, and where it shows on the bill page.
   var STAGE_SETS = [
