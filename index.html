@@ -154,6 +154,15 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 .tabs button[aria-pressed="true"] { background: var(--tab-on-bg); color: var(--tab-on-fg); font-weight: 700; }
 .tabs button[aria-pressed="true"] .n { background: var(--tab-on-fg); color: var(--tab-on-bg); }
 .tabs button:focus-visible { outline-color: var(--tab-bg); }
+/* Amended onto */
+.menu-btn .mi.i-amd { stroke: #6B3FA0; fill: #D9C7F0; }
+.carrier-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-fg); font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
+.carrier-note button, .alink { align-self: flex-start; min-height: 36px; padding: 0; background: none; border: 0; color: var(--blue-fg); font-weight: 700; text-decoration: underline; text-align: left; }
+.arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
+.arow:last-child { border-bottom: 0; }
+.arow .rm { flex: 0 0 auto; height: 36px; padding: 0 12px; background: transparent; border: 1px solid var(--field); border-radius: 8px; color: var(--muted); }
+#amendAdd { display: flex; gap: 8px; }
+#amendNum { flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
 </style>
 </head>
 <body>
@@ -187,6 +196,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
           <svg class="mi i-com" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.6L7 21l5-2.8 5 2.8-1.7-7.4"/></svg>
           <span class="ml">Professional Registration</span><span class="mn" data-count="committee">0</span>
         </button>
+        <button type="button" class="menu-btn" data-go="amended">
+          <svg class="mi i-amd" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M6 8.5c0 3 2 3.5 4.5 3.5h5"/></svg>
+          <span class="ml">Amended To</span><span class="mn" data-count="amended">0</span>
+        </button>
       </div>
     </section>
 
@@ -196,6 +209,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
     <section class="card" id="detail" hidden>
       <h2 id="dTitle"></h2>
+      <div class="carrier-note" id="carrierNote" hidden></div>
       <p class="status" id="dStatus" hidden></p>
       <p class="summary" id="dSummary"></p>
       <div class="sections">
@@ -234,6 +248,16 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       </div>
     </section>
 
+    <section class="card" id="amendCard" hidden>
+      <h3>Amended onto</h3>
+      <div id="amendList"></div>
+      <form id="amendAdd" autocomplete="off">
+        <input id="amendNum" type="text" aria-label="Bill number" placeholder="2600 or SB 975" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <button class="btn" id="amendBtn" type="submit">Add</button>
+      </form>
+      <p class="hint">Type each bill your bill was amended onto. It is looked up and saved, and shows under Amended To with a note about your bill.</p>
+    </section>
+
     <section id="listWrap" hidden>
       <div class="listhead"><h3 id="listTitle">All bills</h3><span id="listCount"></span></div>
       <div id="list"></div>
@@ -259,7 +283,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   ];
 
   var state = {
-    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided', stage: '', mystage: '', dates: {},
+    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided', stage: '', mystage: '', dates: {}, amendedto: [],
     dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
@@ -283,7 +307,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       number: s(b.number), title: s(b.title), status: s(b.status), summary: s(b.summary),
       proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
       vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
-      dates: (b.dates && typeof b.dates === 'object') ? b.dates : {}, notes: s(b.notes), mine: mine, committee: com
+      dates: (b.dates && typeof b.dates === 'object') ? b.dates : {},
+      amendedto: Array.isArray(b.amendedto) ? b.amendedto.map(String) : [], notes: s(b.notes), mine: mine, committee: com
     };
   }
 
@@ -330,7 +355,18 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function inTab(b) {
     if (state.tab === 'my') return !!b.mine;
     if (state.tab === 'committee') return !!b.committee;
+    if (state.tab === 'amended') return mineOn(norm(b.number)).length > 0;
     return true;
+  }
+
+  // Your bills that were amended onto the bill with this id.
+  function mineOn(id) {
+    var out = [];
+    state.order.forEach(function (k) {
+      var m = state.bills.get(k);
+      if (m && k !== id && (m.amendedto || []).some(function (x) { return norm(x) === id; })) out.push(m.number);
+    });
+    return out.sort(function (a, b) { return byNumber(norm(a), norm(b)); });
   }
 
   function renderTabs() {
@@ -338,7 +374,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var counts = {
       all: all.length,
       my: all.filter(function (b) { return b.mine; }).length,
-      committee: all.filter(function (b) { return b.committee; }).length
+      committee: all.filter(function (b) { return b.committee; }).length,
+      amended: all.filter(function (b) { return mineOn(norm(b.number)).length > 0; }).length
     };
     document.querySelectorAll('[data-count]').forEach(function (el) {
       el.textContent = String(counts[el.getAttribute('data-count')]);
@@ -346,7 +383,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   }
 
   function renderList() {
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration' };
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To' };
     var box = $('list');
     box.textContent = '';
     $('listTitle').textContent = names[state.tab];
@@ -355,6 +392,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     if (!ids.length) {
       var t = !state.loaded || state.loadError ? emptyMessage()
         : state.tab === 'all' ? 'No bills saved yet. Go Home and type a bill number.'
+        : state.tab === 'amended' ? 'Nothing here yet. Open one of your bills and add the bill it was amended onto.'
         : 'Nothing here yet. Open a bill, tick ' + names[state.tab] + ', and save.';
       box.appendChild(h('p', 'hint', t));
       return;
@@ -370,6 +408,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       if (b.title) btn.appendChild(h('span', 'rs', b.title));
       var when = dateKey ? fmtDT(b.dates && b.dates[dateKey]) : '';
       if (when) btn.appendChild(h('span', 'rd', when));
+      if (state.tab === 'amended') {
+        var mo = mineOn(id);
+        btn.appendChild(h('span', 'rd', 'Carries my ' + mo.join(', ')));
+      }
       btn.addEventListener('click', function () { select(id); });
       return btn;
     }
@@ -392,6 +434,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       });
       return;
     }
+    if (state.tab === 'amended') ids.sort(byNumber);
     ids.forEach(function (id) { box.appendChild(rowFor(id)); });
   }
 
@@ -409,9 +452,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     state.stage = STAGES.indexOf(b.stage) >= 0 ? b.stage : '';
     state.mystage = MY_STAGES.indexOf(b.mystage) >= 0 ? b.mystage : '';
     state.dates = JSON.parse(JSON.stringify(b.dates || {}));
+    state.amendedto = (b.amendedto || []).slice();
     state.dirty = false;
     renderVotes();
     renderStage();
+    renderAmend();
   }
 
   // Build the stage rows (a checkbox plus a date and a time box) once, when the page opens.
@@ -471,6 +516,98 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     });
   }
 
+  function renderAmend() {
+    var b = state.selected ? state.bills.get(state.selected) : null;
+    var box = $('amendList');
+    box.textContent = '';
+    if (!b) return;
+    if (!state.amendedto.length) box.appendChild(h('p', 'hint', 'None yet.'));
+    state.amendedto.forEach(function (num) {
+      var row = h('div', 'arow');
+      var id = norm(num);
+      if (state.bills.has(id)) {
+        var go = h('button', 'alink', num);
+        go.type = 'button';
+        go.addEventListener('click', function () { select(id); });
+        row.appendChild(go);
+      } else {
+        row.appendChild(h('span', 'rt', num));
+      }
+      var rm = h('button', 'rm', 'Remove');
+      rm.type = 'button';
+      rm.setAttribute('aria-label', 'Remove ' + num);
+      rm.addEventListener('click', function () {
+        state.amendedto = state.amendedto.filter(function (x) { return norm(x) !== id; });
+        amendChanged();
+      });
+      row.appendChild(rm);
+      box.appendChild(row);
+    });
+    // On a bill that carries yours: say which of your bills are on it.
+    var note = $('carrierNote');
+    var mo = mineOn(state.selected);
+    note.textContent = '';
+    note.hidden = !mo.length;
+    mo.forEach(function (num) {
+      var line = h('span');
+      line.appendChild(document.createTextNode('My bill '));
+      var k = norm(num);
+      var go = h('button', '', num);
+      go.type = 'button';
+      go.addEventListener('click', function () { select(k); });
+      line.appendChild(go);
+      line.appendChild(document.createTextNode(' is amended to this bill.'));
+      note.appendChild(line);
+    });
+  }
+
+  function amendChanged() {
+    var b = state.bills.get(state.selected);
+    if (b) b.amendedto = state.amendedto.slice();
+    markDirty();
+    flush();
+    renderTabs();
+    renderList();
+    renderAmend();
+  }
+
+  function addAmended(e) {
+    e.preventDefault();
+    if (!state.selected || state.busy) return;
+    var mine = state.selected;
+    var id = norm($('amendNum').value);
+    if (/^\d{1,5}$/.test(id)) id = 'HB' + id;
+    if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
+      showMsg('Type the digits for a House bill, like 2600. For a Senate bill, type SB first, like SB 975.', null, null, true);
+      return;
+    }
+    if (id === mine) { showMsg('That is the same bill. Type the other bill.', null, null, true); return; }
+    if (state.amendedto.some(function (x) { return norm(x) === id; })) { showMsg(disp(id) + ' is already listed.'); return; }
+    flush();
+    function done() {
+      if (state.selected !== mine) { showMsg(disp(id) + ' was saved but not linked, because you left the bill. Open it and add it again.', null, null, true); return; }
+      state.amendedto.push(disp(id));
+      $('amendNum').value = '';
+      showMsg('');
+      amendChanged();
+    }
+    if (state.bills.has(id)) { done(); return; }
+    setBusy(true);
+    $('amendBtn').disabled = true;
+    showMsg('Looking up ' + disp(id) + '. This can take up to a minute.');
+    api({ action: 'lookup', number: disp(id), refresh: false }).then(function (j) {
+      var nb = clean(j.bill);
+      var key = norm(nb.number);
+      if (!state.bills.has(key)) { state.bills.set(key, nb); state.order.unshift(key); }
+      done();
+    }).catch(function (err) {
+      showMsg(err.message, null, null, true);
+    }).then(function () {
+      setBusy(false);
+      $('amendBtn').disabled = false;
+    });
+  }
+
   function fmtDT(x) {
     if (!x) return '';
     var out = [];
@@ -499,7 +636,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var b = state.selected ? state.bills.get(state.selected) : null;
     var v = state.view;
     document.body.setAttribute('data-view', v);
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration' };
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To' };
     $('lookup').hidden = v !== 'home';
     $('homeBtn').hidden = v === 'home';
     $('backBtn').hidden = v !== 'bill';
@@ -509,6 +646,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('listWrap').hidden = v !== 'list';
     $('detail').hidden = !b || v !== 'bill';
     $('noteCard').hidden = !b || v !== 'bill';
+    $('amendCard').hidden = !b || v !== 'bill';
     $('empty').hidden = !!b || v !== 'bill';
     document.querySelectorAll('[data-vote]').forEach(function (btn) { btn.disabled = !b; });
     $('chkMine').disabled = !b;
@@ -530,6 +668,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('sProcess').textContent = b.process || none;
     $('sAmend').textContent = b.amend || none;
     if (force || (!state.dirty && !state.saving && !state.queue.length)) fillForm(b);
+    else renderAmend();
   }
 
   function renderAll(forceForm) {
@@ -650,7 +789,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     return {
       action: 'save', number: b.number, vote: state.vote, notes: $('notes').value,
       mine: $('chkMine').checked, committee: $('chkCom').checked, stage: state.stage,
-      mystage: state.mystage, dates: JSON.parse(JSON.stringify(state.dates))
+      mystage: state.mystage, dates: JSON.parse(JSON.stringify(state.dates)),
+      amendedto: state.amendedto.slice()
     };
   }
 
@@ -719,6 +859,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('notes').addEventListener('blur', flush);
   $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
+  $('amendAdd').addEventListener('submit', addAmended);
   buildStageRows();
   document.querySelectorAll('[data-vote]').forEach(function (btn) {
     btn.addEventListener('click', function () {
