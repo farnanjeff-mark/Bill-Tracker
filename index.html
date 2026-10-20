@@ -456,6 +456,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
           if (set.stages.indexOf(s) < 0) s = '';
           return s === g.key;
         }).sort(byNumber);
+        // On My bills, a heading stays hidden until a bill is under it.
+        if (!gi.length && set.tab === 'my') return;
         var head = h('div', 'grouphead');
         head.appendChild(h('h4', '', g.title));
         head.appendChild(h('span', 'gcount', String(gi.length)));
