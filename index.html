@@ -105,7 +105,9 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .stagerow:last-child { border-bottom: 0; }
 .stagerow label { min-height: 44px; display: flex; align-items: center; gap: 12px; }
 .stagerow input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); margin: 0; }
-.dt { display: flex; gap: 8px; padding-left: 34px; }
+.dt { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 34px; }
+.dt input[data-kind="d"] { flex: 0 0 134px; }
+.dt input[data-kind="n"] { flex: 1 1 100%; }
 .dt input { flex: 1 1 0; min-width: 0; height: 40px; padding: 0 8px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
 .rd { font-size: 14px; font-weight: 700; color: var(--blue-fg); }
 .grouphead { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; padding-bottom: 4px; border-bottom: 2px solid var(--green); }
@@ -180,6 +182,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 .chamber { flex: 0 0 100%; display: flex; gap: 3px; padding: 3px; background: var(--abs-bg); border-radius: 10px; }
 .chamber button { flex: 1 1 0; height: 36px; background: transparent; border: 0; border-radius: 8px; font-weight: 400; color: var(--abs-fg); }
 .chamber button[aria-pressed="true"] { background: var(--surface); color: var(--blue-fg); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.18); }
+.facts { display: flex; flex-direction: column; gap: 6px; }
+.facts p { margin: 0; display: flex; flex-direction: column; }
+.facts .fl { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 </style>
 </head>
 <body>
@@ -238,6 +243,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       </div>
       <div class="carrier-note" id="carrierNote" hidden></div>
       <p class="status" id="dStatus" hidden></p>
+      <div class="facts" id="dFacts" hidden>
+        <p><span class="fl">Sponsor</span><span id="dSponsor"></span></p>
+        <p><span class="fl">Where it is</span><span id="dWhere"></span></p>
+      </div>
       <p class="summary" id="dSummary"></p>
       <div class="sections">
         <details><summary>Pros and cons</summary><p id="sPros"></p></details>
@@ -266,12 +275,12 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <div id="myStageBox" hidden>
         <div class="lbl">My bill stage</div>
         <div class="stagelist" id="myStageList"></div>
-        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and time for any stage.</p>
+        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and a note for any stage.</p>
       </div>
       <div id="stageBox" hidden>
         <div class="lbl">Professional Registration stage</div>
         <div class="stagelist" id="comStageList"></div>
-        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and time for any stage.</p>
+        <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and a note for any stage.</p>
       </div>
     </section>
 
@@ -336,6 +345,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var com = b.committee === true || String(b.committee).toUpperCase() === 'TRUE';
     return {
       number: s(b.number), title: s(b.title), status: s(b.status), summary: s(b.summary),
+      sponsor: s(b.sponsor), where: s(b.where),
       proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
       vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
       dates: (b.dates && typeof b.dates === 'object') ? b.dates : {},
@@ -508,16 +518,17 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
         label.appendChild(document.createTextNode(name));
         row.appendChild(label);
         var dt = h('div', 'dt');
-        [['d', 'date', ' date'], ['t', 'time', ' time']].forEach(function (k) {
+        [['d', 'date', ' date'], ['n', 'text', ' note']].forEach(function (k) {
           var inp = document.createElement('input');
           inp.type = k[1];
+          if (k[0] === 'n') { inp.maxLength = 200; inp.placeholder = 'Note'; inp.autocomplete = 'off'; }
           inp.setAttribute('data-key', key);
           inp.setAttribute('data-kind', k[0]);
           inp.setAttribute('aria-label', name + k[2]);
           inp.addEventListener('change', function () {
-            var cur = state.dates[key] || { d: '', t: '' };
+            var cur = state.dates[key] || { d: '', t: '', n: '' };
             cur[k[0]] = inp.value;
-            if (cur.d || cur.t) state.dates[key] = cur; else delete state.dates[key];
+            if (cur.d || cur.t || cur.n) state.dates[key] = cur; else delete state.dates[key];
             markDirty();
             flush();
           });
@@ -648,11 +659,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     if (m) {
       out.push(new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }));
     }
-    var t = /^(\d{2}):(\d{2})$/.exec(x.t || '');
-    if (t) {
-      out.push(new Date(2000, 0, 1, +t[1], +t[2]).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
-    }
-    return out.join(', ');
+    if (x.n) out.push(x.n);
+    return out.join(' - ');
   }
 
   function byNumber(a, b) {
@@ -694,6 +702,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var st = $('dStatus');
     st.textContent = b.status;
     st.hidden = !b.status;
+    var fx = $('dFacts');
+    fx.hidden = false;
+    $('dSponsor').textContent = b.sponsor || (infoTried[state.selected] ? 'Not available.' : 'Loading...');
+    $('dWhere').textContent = b.where || b.status || 'Loading...';
     var none = 'Not available.';
     $('dSummary').textContent = b.summary || none;
     $('sPros').textContent = b.proscons || none;
@@ -718,6 +730,27 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     state.dirty = false;
     renderAll(true);
     $('main').scrollTop = 0;
+    fillInfo(id);
+  }
+
+  // An older saved bill has no sponsor yet: ask the back room once (LegiScan only, no Claude).
+  var infoTried = {};
+  function fillInfo(id) {
+    var b = state.bills.get(id);
+    if (!b || b.sponsor || infoTried[id]) return;
+    infoTried[id] = true;
+    api({ action: 'lookup', number: b.number, refresh: false }).then(function (j) {
+      var nb = clean(j.bill);
+      var cur = state.bills.get(id);
+      if (!cur) return;
+      cur.sponsor = nb.sponsor;
+      cur.where = nb.where;
+      cur.status = nb.status || cur.status;
+      if (state.selected === id) renderDetail(false);
+    }).catch(function () {
+      var cur = state.bills.get(id);
+      if (cur && !cur.sponsor && state.selected === id) { $('dSponsor').textContent = 'Not available.'; }
+    });
   }
 
   function goHome() {
