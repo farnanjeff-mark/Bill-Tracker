@@ -19,7 +19,7 @@
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
   --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
   --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
-  --home-bg: #E6D8C3; --shadow: rgba(60, 40, 15, 0.28);
+  --home-bg: #EEF0F3; --shadow: rgba(22, 32, 46, 0.14);
   --navbar: #1F5FAD; --tab-bg: #FFFFFF; --tab-fg: #1F5FAD; --tab-on-bg: #1F7A50; --tab-on-fg: #FFFFFF;
   --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -35,7 +35,7 @@
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
     --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
     --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
-    --home-bg: #2B241B; --shadow: rgba(0, 0, 0, 0.55);
+    --home-bg: #121820; --shadow: rgba(0, 0, 0, 0.55);
     --navbar: #1B3A66; --tab-bg: #E8EFEA; --tab-fg: #12315C; --tab-on-bg: #4FB985; --tab-on-fg: #0B1410;
     --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
@@ -59,12 +59,16 @@ button { cursor: pointer; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .band { background: var(--surface); flex: 0 0 auto; }
-.top { border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.top { background: var(--navbar); border-bottom: 0; padding-top: env(safe-area-inset-top, 0px); }
 .top .in { padding-block: 14px 12px; display: flex; flex-direction: column; gap: 10px; }
 .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 1.2; color: var(--green); }
+h1 { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 600; line-height: 1.15; color: #FFFFFF; }
+.eyebrow { margin: 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #CFE0F7; }
+.top .btn.small { background: #FFFFFF; color: #1B4F9C; }
+.top .btn.ghost { background: transparent; color: #FFFFFF; border: 1px solid #FFFFFF; }
 .brand span { font-size: 14px; color: var(--muted); }
-#lookup { display: flex; flex-wrap: wrap; gap: 8px; }
+#lookup { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px; background: var(--surface); border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.12); }
+#lookup .lk { flex: 0 0 100%; font-size: 13px; font-weight: 600; color: var(--muted); }
 #billnum {
   flex: 1 1 120px; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
   background: var(--surface); border: 1px solid var(--field); border-radius: 8px;
@@ -73,7 +77,7 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .btn.small { height: 40px; padding: 0 16px; }
 .btn.ghost { background: transparent; color: var(--blue-fg); border: 1px solid var(--blue-fg); }
-#msg { margin: 0; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+#msg { margin: 0; color: #FFFFFF; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 #msg.err { background: var(--err-bg); color: var(--err-fg); padding: 8px 12px; border-radius: 8px; }
 main { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 main .in { padding-block: 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
@@ -124,14 +128,16 @@ textarea { width: 100%; padding: 12px; background: var(--surface); border: 1px s
 .chip.abs { background: var(--abs-bg); color: var(--abs-fg); }
 .chip.tag { background: var(--blue-bg); color: var(--blue-fg); }
 footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.menu { display: flex; flex-direction: column; gap: 10px; }
-.menu-btn { min-height: 76px; display: flex; align-items: center; gap: 14px; padding: 8px 18px; border: 2px solid var(--btn-blue); border-radius: 12px; background: var(--tab-bg); color: var(--tab-fg); font-size: 18px; font-weight: 400; text-align: left; box-shadow: 0 4px 10px var(--shadow); }
-.menu-btn .mi { flex: 0 0 auto; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.menu-btn .mi.i-all { stroke: #1F5FAD; fill: #BFD6F5; }
-.menu-btn .mi.i-my { stroke: #A8740A; fill: #F6C645; }
-.menu-btn .mi.i-com { stroke: #1F5C45; fill: #7CCB9E; }
-.menu-btn .ml { flex: 1 1 auto; min-width: 0; }
-.menu-btn .mn { flex: 0 0 auto; font-size: 34px; line-height: 1; font-weight: 400; }
+.menu { display: flex; flex-direction: column; gap: 12px; }
+.menu-btn { width: 100%; min-height: 84px; display: flex; align-items: center; gap: 16px; padding: 8px 18px; border: 0; border-radius: 14px; background: var(--surface); color: var(--fg); text-align: left; box-shadow: 0 1px 2px var(--shadow); }
+.menu-btn .mi { flex: 0 0 auto; width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.menu-btn .mi.i-all { stroke: #1F5FAD; }
+.menu-btn .mi.i-my { stroke: #8A5F00; }
+.menu-btn .mi.i-com { stroke: #1F5C45; }
+.menu-btn .mt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.menu-btn .mtt { font-size: 18px; font-weight: 600; }
+.menu-btn .mtd { font-size: 14px; color: var(--muted); }
+.menu-btn .mn { flex: 0 0 auto; font-family: Georgia, 'Times New Roman', serif; font-size: 30px; line-height: 1; color: var(--fg); }
 .menu-btn:active { transform: translateY(1px); box-shadow: 0 2px 5px var(--shadow); }
 body[data-view="home"] main { background: var(--home-bg); }
 #menu { background: transparent; border: 0; padding: 0; }
@@ -155,7 +161,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 .tabs button[aria-pressed="true"] .n { background: var(--tab-on-fg); color: var(--tab-on-bg); }
 .tabs button:focus-visible { outline-color: var(--tab-bg); }
 /* Amended onto */
-.menu-btn .mi.i-amd { stroke: #6B3FA0; fill: #D9C7F0; }
+.menu-btn .mi.i-amd { stroke: #6B3FA0; }
 .carrier-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-fg); font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
 .carrier-note button, .alink { align-self: flex-start; min-height: 36px; padding: 0; background: none; border: 0; color: var(--blue-fg); font-weight: 700; text-decoration: underline; text-align: left; }
 .arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
@@ -171,18 +177,20 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 #delConfirm p { margin: 0; font-weight: 700; }
 #delConfirm .acts { display: flex; gap: 8px; }
 .btn.danger { background: var(--sel-no); color: #fff; }
-.chamber { flex: 0 0 100%; display: flex; gap: 8px; }
-.chamber button { flex: 1 1 0; height: 40px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; font-weight: 400; }
-.chamber button[aria-pressed="true"] { background: var(--btn-blue); border-color: var(--btn-blue); color: var(--btn-blue-fg); font-weight: 700; }
+.chamber { flex: 0 0 100%; display: flex; gap: 3px; padding: 3px; background: var(--abs-bg); border-radius: 10px; }
+.chamber button { flex: 1 1 0; height: 36px; background: transparent; border: 0; border-radius: 8px; font-weight: 400; color: var(--abs-fg); }
+.chamber button[aria-pressed="true"] { background: var(--surface); color: var(--blue-fg); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.18); }
 </style>
 </head>
 <body>
 
 <div class="band top">
   <div class="in">
+    <p class="eyebrow">Missouri General Assembly</p>
     <div class="brand"><h1>Bill Tracker</h1><button class="btn small" id="homeBtn" type="button" hidden>Home</button></div>
     <button class="btn small ghost" id="backBtn" type="button" hidden>Back to list</button>
     <form id="lookup" autocomplete="off">
+      <div class="lk">Look up a bill</div>
       <div class="chamber" role="group" aria-label="House or Senate">
         <button type="button" data-chamber="HB" aria-pressed="true">House</button>
         <button type="button" data-chamber="SB" aria-pressed="false">Senate</button>
@@ -197,23 +205,22 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 <main id="main">
   <div class="in">
     <section class="card" id="menu">
-      <h2>Bill lists</h2>
       <div class="menu">
         <button type="button" class="menu-btn" data-go="all">
           <svg class="mi i-all" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
-          <span class="ml">All Bills</span><span class="mn" data-count="all">0</span>
+          <span class="mt"><span class="mtt">All Bills</span><span class="mtd">Every bill you have looked up</span></span><span class="mn" data-count="all">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="my">
           <svg class="mi i-my" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.3 9.4l6-.9z"/></svg>
-          <span class="ml">My Bills</span><span class="mn" data-count="my">0</span>
+          <span class="mt"><span class="mtt">My Bills</span><span class="mtd">Bills you carry, by stage</span></span><span class="mn" data-count="my">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="committee">
           <svg class="mi i-com" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.6L7 21l5-2.8 5 2.8-1.7-7.4"/></svg>
-          <span class="ml">Professional Registration</span><span class="mn" data-count="committee">0</span>
+          <span class="mt"><span class="mtt">Professional Registration</span><span class="mtd">Committee hearings and votes</span></span><span class="mn" data-count="committee">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="amended">
           <svg class="mi i-amd" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M6 8.5c0 3 2 3.5 4.5 3.5h5"/></svg>
-          <span class="ml">Amended To</span><span class="mn" data-count="amended">0</span>
+          <span class="mt"><span class="mtt">Amended To</span><span class="mtd">Bills carrying your language</span></span><span class="mn" data-count="amended">0</span>
         </button>
       </div>
     </section>
