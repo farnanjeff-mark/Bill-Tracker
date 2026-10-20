@@ -19,7 +19,7 @@
   --err-bg: #F6DCDC; --err-fg: #7A1F1F;
   --bar-yes: #1F8A5B; --bar-no: #C0392B; --bar-und: #2F6FC4; --bar-abs: #8A968F;
   --btn-blue: #1F5FAD; --btn-blue-fg: #FFFFFF;
-  --home-bg: #B7C7AA; --shadow: rgba(25, 45, 30, 0.30);
+  --home-bg: #E6D8C3; --shadow: rgba(60, 40, 15, 0.28);
   --navbar: #1F5FAD; --tab-bg: #FFFFFF; --tab-fg: #1F5FAD; --tab-on-bg: #1F7A50; --tab-on-fg: #FFFFFF;
   --sel-yes: #1F7A50; --sel-no: #B3321F; --sel-und: #1F5FAD; --sel-abs: #5E6B64; --sel-fg: #FFFFFF;
   --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -35,7 +35,7 @@
     --err-bg: #3D1F1F; --err-fg: #F2B6B6;
     --bar-yes: #4FB985; --bar-no: #E5604F; --bar-und: #5B9BE8; --bar-abs: #7C8A83;
     --btn-blue: #5B9BE8; --btn-blue-fg: #08121F;
-    --home-bg: #243024; --shadow: rgba(0, 0, 0, 0.55);
+    --home-bg: #2B241B; --shadow: rgba(0, 0, 0, 0.55);
     --navbar: #1B3A66; --tab-bg: #E8EFEA; --tab-fg: #12315C; --tab-on-bg: #4FB985; --tab-on-fg: #0B1410;
     --sel-yes: #4FB985; --sel-no: #E5604F; --sel-und: #5B9BE8; --sel-abs: #9AA8A0; --sel-fg: #0B1410;
     color-scheme: dark;
@@ -64,9 +64,9 @@ button { cursor: pointer; }
 .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 h1 { margin: 0; font-family: var(--font-display); font-size: 22px; line-height: 1.2; color: var(--green); }
 .brand span { font-size: 14px; color: var(--muted); }
-#lookup { display: flex; gap: 8px; }
+#lookup { display: flex; flex-wrap: wrap; gap: 8px; }
 #billnum {
-  flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
+  flex: 1 1 120px; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px;
   background: var(--surface); border: 1px solid var(--field); border-radius: 8px;
 }
 .btn { height: 46px; padding: 0 20px; white-space: nowrap; font-weight: 700; border: 0; border-radius: 8px; background: var(--btn-blue); color: var(--btn-blue-fg); }
@@ -131,7 +131,7 @@ footer { border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-
 .menu-btn .mi.i-my { stroke: #A8740A; fill: #F6C645; }
 .menu-btn .mi.i-com { stroke: #1F5C45; fill: #7CCB9E; }
 .menu-btn .ml { flex: 1 1 auto; min-width: 0; }
-.menu-btn .mn { flex: 0 0 auto; font-size: 34px; line-height: 1; font-weight: 700; }
+.menu-btn .mn { flex: 0 0 auto; font-size: 34px; line-height: 1; font-weight: 400; }
 .menu-btn:active { transform: translateY(1px); box-shadow: 0 2px 5px var(--shadow); }
 body[data-view="home"] main { background: var(--home-bg); }
 #menu { background: transparent; border: 0; padding: 0; }
@@ -161,8 +161,19 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 .arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
 .arow:last-child { border-bottom: 0; }
 .arow .rm { flex: 0 0 auto; height: 36px; padding: 0 12px; background: transparent; border: 1px solid var(--field); border-radius: 8px; color: var(--muted); }
-#amendAdd { display: flex; gap: 8px; }
-#amendNum { flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+#amendAdd { display: flex; flex-wrap: wrap; gap: 8px; }
+#amendNum { flex: 1 1 120px; min-width: 0; height: 46px; padding: 0 12px; font-size: 18px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+/* Delete */
+#detail { position: relative; }
+#detail h2 { padding-right: 44px; }
+#delBtn { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 0; font-size: 22px; line-height: 1; background: transparent; border: 1px solid var(--field); border-radius: 8px; color: var(--muted); }
+#delConfirm { padding: 12px; border-radius: 8px; background: var(--err-bg); color: var(--err-fg); display: flex; flex-direction: column; gap: 10px; }
+#delConfirm p { margin: 0; font-weight: 700; }
+#delConfirm .acts { display: flex; gap: 8px; }
+.btn.danger { background: var(--sel-no); color: #fff; }
+.chamber { flex: 0 0 100%; display: flex; gap: 8px; }
+.chamber button { flex: 1 1 0; height: 40px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; font-weight: 400; }
+.chamber button[aria-pressed="true"] { background: var(--btn-blue); border-color: var(--btn-blue); color: var(--btn-blue-fg); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -172,7 +183,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     <div class="brand"><h1>Bill Tracker</h1><button class="btn small" id="homeBtn" type="button" hidden>Home</button></div>
     <button class="btn small ghost" id="backBtn" type="button" hidden>Back to list</button>
     <form id="lookup" autocomplete="off">
-      <input id="billnum" type="text" aria-label="Bill number" placeholder="2600 or SB 975" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <div class="chamber" role="group" aria-label="House or Senate">
+        <button type="button" data-chamber="HB" aria-pressed="true">House</button>
+        <button type="button" data-chamber="SB" aria-pressed="false">Senate</button>
+      </div>
+      <input id="billnum" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="Bill number" placeholder="Bill number, like 2600" autocorrect="off" spellcheck="false" enterkeyhint="search">
       <button class="btn" id="go" type="submit">Look up</button>
     </form>
     <p id="msg" role="status" hidden></p>
@@ -209,6 +224,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
     <section class="card" id="detail" hidden>
       <h2 id="dTitle"></h2>
+      <button type="button" id="delBtn" aria-label="Delete this bill" title="Delete this bill">&#10005;</button>
+      <div id="delConfirm" hidden>
+        <p id="delText"></p>
+        <div class="acts"><button type="button" class="btn small danger" id="delYes">Delete</button><button type="button" class="btn small ghost" id="delNo">Cancel</button></div>
+      </div>
       <div class="carrier-note" id="carrierNote" hidden></div>
       <p class="status" id="dStatus" hidden></p>
       <p class="summary" id="dSummary"></p>
@@ -252,7 +272,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <h3>Amended onto</h3>
       <div id="amendList"></div>
       <form id="amendAdd" autocomplete="off">
-        <input id="amendNum" type="text" aria-label="Bill number" placeholder="2600 or SB 975" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <div class="chamber" role="group" aria-label="House or Senate">
+        <button type="button" data-chamber="HB" aria-pressed="true">House</button>
+        <button type="button" data-chamber="SB" aria-pressed="false">Senate</button>
+      </div>
+      <input id="amendNum" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="Bill number" placeholder="Bill number, like 2600" autocorrect="off" spellcheck="false" enterkeyhint="done">
         <button class="btn" id="amendBtn" type="submit">Add</button>
       </form>
       <p class="hint">Type each bill your bill was amended onto. It is looked up and saved, and shows under Amended To with a note about your bill.</p>
@@ -275,7 +299,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
 
   var STAGES = ['Hearing Scheduled', 'Bills Up for Vote', 'Pass/Fail'];
-  var MY_STAGES = ['Hearing Scheduled', 'Hearing Held', 'Executive Session', 'In Rules', 'Ready for Floor'];
+  var MY_STAGES = ['Hearing Scheduled', 'Hearing Held', 'Executive Session', 'In Rules', 'Ready for Floor', 'In the Senate'];
   // One set per group of bills: the field it saves to, its stages, and where it shows on the bill page.
   var STAGE_SETS = [
     { prefix: 'm', field: 'mystage', stages: MY_STAGES, list: 'myStageList', box: 'myStageBox', flag: 'chkMine', tab: 'my' },
@@ -284,7 +308,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   var state = {
     bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided', stage: '', mystage: '', dates: {}, amendedto: [],
-    dirty: false, loaded: false, loadError: false, busy: false, saving: false,
+    chamber: 'HB', dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
 
@@ -347,7 +371,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function emptyMessage() {
     if (state.loadError) return 'Saved bills could not be loaded.';
     if (!state.loaded) return 'Loading saved bills.';
-    return 'No bills saved yet. Type a bill number above, like 2600. For a Senate bill, type SB 975.';
+    return 'No bills saved yet. Tap House or Senate, then type a bill number above, like 2600.';
   }
 
   // ---------- drawing ----------
@@ -576,9 +600,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     if (!state.selected || state.busy) return;
     var mine = state.selected;
     var id = norm($('amendNum').value);
-    if (/^\d{1,5}$/.test(id)) id = 'HB' + id;
+    if (/^\d{1,5}$/.test(id)) id = state.chamber + id;
     if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
-      showMsg('Type the digits for a House bill, like 2600. For a Senate bill, type SB first, like SB 975.', null, null, true);
+      showMsg('Type the bill number, like 2600. Tap House or Senate first.', null, null, true);
       return;
     }
     if (id === mine) { showMsg('That is the same bill. Type the other bill.', null, null, true); return; }
@@ -679,6 +703,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   function select(id) {
     flush();
+    $('delConfirm').hidden = true;
     state.view = 'bill';
     state.selected = id;
     state.dirty = false;
@@ -688,6 +713,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   function goHome() {
     flush();
+    $('delConfirm').hidden = true;
     state.view = 'home';
     state.dirty = false;
     if (!state.saveErr && !state.loadError) showMsg('');
@@ -697,6 +723,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   function goList(tab) {
     flush();
+    $('delConfirm').hidden = true;
     state.view = 'list';
     if (tab) state.tab = tab;
     state.dirty = false;
@@ -763,12 +790,51 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     });
   }
 
+  function askDelete() {
+    var b = state.selected ? state.bills.get(state.selected) : null;
+    if (!b) return;
+    $('delText').textContent = 'Delete ' + b.number + '? This removes the bill, your vote, notes and dates for good. It also removes it from any Amended onto list. This cannot be undone.';
+    $('delConfirm').hidden = false;
+  }
+
+  function doDelete() {
+    var id = state.selected;
+    var b = id ? state.bills.get(id) : null;
+    if (!b || state.busy) return;
+    clearTimeout(state.timer);
+    state.dirty = false;
+    if (state.saving || state.queue.length) {
+      showMsg('Saving your changes first. Try again in a moment.');
+      return;
+    }
+    setBusy(true);
+    $('delYes').disabled = true;
+    api({ action: 'delete', number: b.number }).then(function () {
+      state.bills.delete(id);
+      state.order = state.order.filter(function (k) { return k !== id; });
+      state.bills.forEach(function (o) {
+        o.amendedto = (o.amendedto || []).filter(function (x) { return norm(x) !== id; });
+      });
+      state.selected = null;
+      state.view = 'list';
+      $('delConfirm').hidden = true;
+      showMsg(disp(id) + ' was deleted.');
+      renderAll(true);
+      $('main').scrollTop = 0;
+    }).catch(function (err) {
+      showMsg(err.message, null, null, true);
+    }).then(function () {
+      setBusy(false);
+      $('delYes').disabled = false;
+    });
+  }
+
   function lookup(e) {
     e.preventDefault();
     var id = norm($('billnum').value);
-    if (/^\d{1,5}$/.test(id)) id = 'HB' + id;
+    if (/^\d{1,5}$/.test(id)) id = state.chamber + id;
     if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
-      showMsg('Type the digits for a House bill, like 2600. For a Senate bill, type SB first, like SB 975.', null, null, true);
+      showMsg('Type the bill number, like 2600. Tap House or Senate first.', null, null, true);
       return;
     }
     $('billnum').value = disp(id);
@@ -860,6 +926,17 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('amendAdd').addEventListener('submit', addAmended);
+  document.querySelectorAll('[data-chamber]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.chamber = btn.getAttribute('data-chamber');
+      document.querySelectorAll('[data-chamber]').forEach(function (b2) {
+        b2.setAttribute('aria-pressed', String(b2.getAttribute('data-chamber') === state.chamber));
+      });
+    });
+  });
+  $('delBtn').addEventListener('click', askDelete);
+  $('delNo').addEventListener('click', function () { $('delConfirm').hidden = true; });
+  $('delYes').addEventListener('click', doDelete);
   buildStageRows();
   document.querySelectorAll('[data-vote]').forEach(function (btn) {
     btn.addEventListener('click', function () {
