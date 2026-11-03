@@ -179,7 +179,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 #detail h2 { padding-right: 44px; }
 #myDesc { width: 100%; height: 44px; padding: 0 12px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
 #detail h2 { padding-right: 44px; }
-.rmine { font-weight: 600; color: var(--fg); overflow-wrap: anywhere; }
+.rline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.rmine { flex: 1 1 140px; min-width: 0; font-weight: 600; color: var(--fg); overflow-wrap: anywhere; }
 #delBtn { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 0; font-size: 22px; line-height: 1; background: transparent; border: 1px solid var(--field); border-radius: 8px; color: var(--muted); }
 #delConfirm { padding: 12px; border-radius: 8px; background: var(--err-bg); color: var(--err-fg); display: flex; flex-direction: column; gap: 10px; }
 #delConfirm p { margin: 0; font-weight: 700; }
@@ -453,8 +454,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       btn.type = 'button';
       btn.setAttribute('aria-current', id === state.selected ? 'true' : 'false');
       btn.setAttribute('aria-label', b.number + (b.title ? ', ' + b.title : '') + '. Vote: ' + b.vote);
-      btn.appendChild(h('span', 'rt', b.number));
-      if (b.mydesc) btn.appendChild(h('span', 'rmine', b.mydesc));
+      var line = h('span', 'rline');
+      line.appendChild(h('span', 'rt', b.number));
+      if (b.mydesc) line.appendChild(h('span', 'rmine', b.mydesc));
+      btn.appendChild(line);
       if (b.title) btn.appendChild(h('span', 'rs', b.title));
       var when = dateKey ? fmtDT(b.dates && b.dates[dateKey]) : '';
       if (when) btn.appendChild(h('span', 'rd', when));
