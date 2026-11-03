@@ -177,6 +177,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 /* Delete */
 #detail { position: relative; }
 #detail h2 { padding-right: 44px; }
+#myDesc { width: 100%; height: 44px; padding: 0 12px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+#detail h2 { padding-right: 44px; }
+.rmine { font-weight: 600; color: var(--fg); overflow-wrap: anywhere; }
 #delBtn { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 0; font-size: 22px; line-height: 1; background: transparent; border: 1px solid var(--field); border-radius: 8px; color: var(--muted); }
 #delConfirm { padding: 12px; border-radius: 8px; background: var(--err-bg); color: var(--err-fg); display: flex; flex-direction: column; gap: 10px; }
 #delConfirm p { margin: 0; font-weight: 700; }
@@ -240,6 +243,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
     <section class="card" id="detail" hidden>
       <h2 id="dTitle"></h2>
+      <input type="text" id="myDesc" maxlength="80" autocomplete="off" aria-label="My description" placeholder="My description (for my reference)">
       <button type="button" id="delBtn" aria-label="Delete this bill" title="Delete this bill">&#10005;</button>
       <div id="delConfirm" hidden>
         <p id="delText"></p>
@@ -349,7 +353,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var com = b.committee === true || String(b.committee).toUpperCase() === 'TRUE';
     return {
       number: s(b.number), title: s(b.title), status: s(b.status), summary: s(b.summary),
-      sponsor: s(b.sponsor), where: s(b.where),
+      sponsor: s(b.sponsor), where: s(b.where), mydesc: s(b.mydesc),
       proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
       vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
       dates: (b.dates && typeof b.dates === 'object') ? b.dates : {},
@@ -450,6 +454,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       btn.setAttribute('aria-current', id === state.selected ? 'true' : 'false');
       btn.setAttribute('aria-label', b.number + (b.title ? ', ' + b.title : '') + '. Vote: ' + b.vote);
       btn.appendChild(h('span', 'rt', b.number));
+      if (b.mydesc) btn.appendChild(h('span', 'rmine', b.mydesc));
       if (b.title) btn.appendChild(h('span', 'rs', b.title));
       var when = dateKey ? fmtDT(b.dates && b.dates[dateKey]) : '';
       if (when) btn.appendChild(h('span', 'rd', when));
@@ -492,6 +497,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function fillForm(b) {
     state.vote = b.vote || 'Undecided';
     $('notes').value = b.notes || '';
+    $('myDesc').value = b.mydesc || '';
     $('chkMine').checked = !!b.mine;
     $('chkCom').checked = !!b.committee;
     state.stage = STAGES.indexOf(b.stage) >= 0 ? b.stage : '';
@@ -897,7 +903,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function buildPayload() {
     var b = state.bills.get(state.selected);
     return {
-      action: 'save', number: b.number, vote: state.vote, notes: $('notes').value,
+      action: 'save', number: b.number, vote: state.vote, notes: $('notes').value, mydesc: $('myDesc').value,
       mine: $('chkMine').checked, committee: $('chkCom').checked, stage: state.stage,
       mystage: state.mystage, dates: JSON.parse(JSON.stringify(state.dates)),
       amendedto: state.amendedto.slice()
@@ -967,6 +973,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('refresh').addEventListener('click', function () { if (state.selected) runLookup(state.selected, true); });
   $('notes').addEventListener('input', scheduleSave);
   $('notes').addEventListener('blur', flush);
+  $('myDesc').addEventListener('input', scheduleSave);
+  $('myDesc').addEventListener('blur', flush);
   $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('amendAdd').addEventListener('submit', addAmended);
