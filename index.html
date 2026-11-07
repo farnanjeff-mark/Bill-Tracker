@@ -168,6 +168,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 /* Amended onto */
 .menu-btn .mi.i-amd { stroke: #6B3FA0; }
 .menu-btn .mi.i-watch { stroke: #B3541E; }
+#loginCard input[type="text"], #loginCard input[type="password"], #settingsCard input[type="text"] { width: 100%; height: 46px; padding: 0 12px; font-size: 18px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
+#liMsg, #stMsg { min-height: 1.4em; font-weight: 600; }
+.topbtns { display: flex; gap: 8px; }
 .carrier-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-fg); font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
 .carrier-note button, .alink { align-self: flex-start; min-height: 36px; padding: 0; background: none; border: 0; color: var(--blue-fg); font-weight: 700; text-decoration: underline; text-align: left; }
 .arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
@@ -201,7 +204,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 <div class="band top">
   <div class="in">
     <p class="eyebrow">Missouri General Assembly</p>
-    <div class="brand"><div class="logo"><h1>Bill Tracker</h1></div><button class="btn small" id="homeBtn" type="button" hidden>Home</button></div>
+    <div class="brand"><div class="logo"><h1>Bill Tracker</h1></div><div class="topbtns"><button class="btn small" id="setBtn" type="button" hidden>Settings</button><button class="btn small" id="homeBtn" type="button" hidden>Home</button></div></div>
     <button class="btn small ghost" id="backBtn" type="button" hidden>Back to list</button>
     <form id="lookup" autocomplete="off">
       <div class="lk">Look up a bill</div>
@@ -218,6 +221,31 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
 <main id="main">
   <div class="in">
+    <section class="card" id="loginCard" hidden>
+      <h2>Sign in</h2>
+      <label class="lbl" for="liName">Name</label>
+      <input id="liName" type="text" autocomplete="username" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="Name">
+      <label class="lbl" for="liPin">4-digit PIN</label>
+      <input id="liPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="current-password" aria-label="PIN">
+      <button class="btn" id="liGo" type="button">Sign in</button>
+      <p class="hint" id="liMsg" role="status"></p>
+      <p class="hint">Your votes and notes show only to you in this app. They are stored in a Google Sheet that Jeff Farnan owns, so he can technically read them.</p>
+    </section>
+
+    <section class="card" id="settingsCard" hidden>
+      <h3>Settings</h3>
+      <p class="hint">Signed in as <strong id="stName"></strong></p>
+      <div class="checks"><label><input type="checkbox" id="stChair"> I chair a committee</label></div>
+      <div id="stComBox" hidden>
+        <div class="lbl">Committee name</div>
+        <input type="text" id="stCom" maxlength="60" autocomplete="off" aria-label="Committee name" placeholder="Committee name">
+        <p class="hint">This becomes the name of your committee list on the home screen.</p>
+      </div>
+      <button class="btn" id="stSave" type="button">Save settings</button>
+      <p class="hint" id="stMsg" role="status"></p>
+      <button class="btn small ghost" id="signOut" type="button">Sign out</button>
+    </section>
+
     <section class="card" id="menu">
       <div class="menu">
         <button type="button" class="menu-btn" data-go="all">
@@ -228,9 +256,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
           <svg class="mi i-my" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.3 9.4l6-.9z"/></svg>
           <span class="mt"><span class="mtt">My Bills</span><span class="mtd">Bills you carry, by stage</span></span><span class="mn" data-count="my">0</span>
         </button>
-        <button type="button" class="menu-btn" data-go="committee">
+        <button type="button" class="menu-btn" id="menuCom" data-go="committee" hidden>
           <svg class="mi i-com" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.6L7 21l5-2.8 5 2.8-1.7-7.4"/></svg>
-          <span class="mt"><span class="mtt">Professional Registration</span><span class="mtd">Committee hearings and votes</span></span><span class="mn" data-count="committee">0</span>
+          <span class="mt"><span class="mtt" id="comTitle">Professional Registration</span><span class="mtd">Committee hearings and votes</span></span><span class="mn" data-count="committee">0</span>
         </button>
         <button type="button" class="menu-btn" data-go="amended">
           <svg class="mi i-amd" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M6 8.5c0 3 2 3.5 4.5 3.5h5"/></svg>
@@ -284,7 +312,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <div class="lbl">Save to</div>
       <div class="checks">
         <label><input type="checkbox" id="chkMine"> My bills</label>
-        <label><input type="checkbox" id="chkCom"> Professional Registration</label>
+        <label id="comLabel" hidden><input type="checkbox" id="chkCom"> <span id="comLabelText">Professional Registration</span></label>
         <label><input type="checkbox" id="chkWatch"> Bills to Watch</label>
       </div>
       <div id="myStageBox" hidden>
@@ -293,7 +321,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
         <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and a note for any stage.</p>
       </div>
       <div id="stageBox" hidden>
-        <div class="lbl">Professional Registration stage</div>
+        <div class="lbl" id="comStageTitle">Committee stage</div>
         <div class="stagelist" id="comStageList"></div>
         <p class="hint">Check one stage. With none checked, the bill stays under Bills. Add a date and a note for any stage.</p>
       </div>
@@ -327,7 +355,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 <script>
 (function () {
   // The Google Apps Script web app that looks bills up and stores your votes and notes.
-  var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbzcrwNunGDadM187TVbblo4UVeabEib8ZIQmUFveaVZhkVmwBwRYaCd6e4CAY2QV_tY/exec';
+  var BACKROOM_URL = 'https://script.google.com/macros/s/AKfycbyIMBY93FdjYNtCes8facCtwMdnUBWX8JeGaQsA6_PHbJcuZlIkdeV7fTaDaNZOG1yz/exec';
 
   var STAGES = ['Hearing Scheduled', 'Bills Up for Vote', 'Pass/Fail'];
   var MY_STAGES = ['Hearing Scheduled', 'Hearing Held', 'Executive Session', 'In Rules', 'Ready for Floor', 'In the Senate'];
@@ -338,8 +366,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   ];
 
   var state = {
-    bills: new Map(), order: [], selected: null, tab: 'all', view: 'home', vote: 'Undecided', stage: '', mystage: '', dates: {}, amendedto: [],
-    chamber: 'HB', dirty: false, loaded: false, loadError: false, busy: false, saving: false,
+    bills: new Map(), order: [], selected: null, tab: 'all', view: 'login', vote: 'Undecided', stage: '', mystage: '', dates: {}, amendedto: [],
+    chamber: 'HB', creds: null, profile: null, signedIn: false, dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
 
@@ -364,21 +392,26 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       proscons: s(b.proscons), questions: s(b.questions), process: s(b.process), amend: s(b.amend),
       vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
       dates: (b.dates && typeof b.dates === 'object') ? b.dates : {},
-      amendedto: Array.isArray(b.amendedto) ? b.amendedto.map(String) : [], notes: s(b.notes), mine: mine, committee: com
+      amendedto: Array.isArray(b.amendedto) ? b.amendedto.map(String) : [], notes: s(b.notes), mine: mine, committee: com,
+      watch: b.watch === true || String(b.watch).toUpperCase() === 'TRUE'
     };
   }
 
   // ---------- talking to the back room ----------
 
   function api(payload) {
+    var body = Object.assign({ user: state.creds ? state.creds.name : '', pin: state.creds ? state.creds.pin : '' }, payload);
     return fetch(BACKROOM_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(body)
     }).then(function (r) { return r.json(); }, function () {
       throw new Error('Could not reach the back room. Check your connection and try again.');
     }).then(function (j) {
-      if (!j || !j.ok) throw new Error((j && j.error) || 'Something went wrong. Try again.');
+      if (!j || !j.ok) {
+        if (j && j.auth && state.signedIn) signOut(j.error);
+        throw new Error((j && j.error) || 'Something went wrong. Try again.');
+      }
       return j;
     });
   }
@@ -408,6 +441,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   // ---------- drawing ----------
 
+  function comName() { return (state.profile && state.profile.committee) || 'My Committee'; }
+  function listNames() { return { all: 'All bills', my: 'My bills', committee: comName(), amended: 'Amended To', watch: 'Bills to Watch' }; }
+
   function inTab(b) {
     if (state.tab === 'my') return !!b.mine;
     if (state.tab === 'committee') return !!b.committee;
@@ -416,8 +452,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     return true;
   }
 
-  // A bill is on the watch list when its saved dates hold the w:on flag.
-  function isWatch(b) { return !!(b && b.dates && b.dates['w:on']); }
+  function isWatch(b) { return !!(b && b.watch); }
 
   // Your bills that were amended onto the bill with this id.
   function mineOn(id) {
@@ -444,7 +479,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   }
 
   function renderList() {
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To', watch: 'Bills to Watch' };
+    var names = listNames();
     var box = $('list');
     box.textContent = '';
     $('listTitle').textContent = names[state.tab];
@@ -701,9 +736,12 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var b = state.selected ? state.bills.get(state.selected) : null;
     var v = state.view;
     document.body.setAttribute('data-view', v);
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To', watch: 'Bills to Watch' };
+    var names = listNames();
+    $('loginCard').hidden = v !== 'login';
+    $('settingsCard').hidden = v !== 'settings';
+    $('setBtn').hidden = v !== 'home';
     $('lookup').hidden = v !== 'home';
-    $('homeBtn').hidden = v === 'home';
+    $('homeBtn').hidden = v === 'home' || v === 'login';
     $('backBtn').hidden = v !== 'bill';
     $('backBtn').textContent = 'Back to ' + names[state.tab];
     $('foot').hidden = v !== 'bill' || !$('savestat').textContent;
@@ -718,6 +756,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('chkCom').disabled = !b;
     $('chkWatch').disabled = !b;
     $('refresh').disabled = !b || state.busy;
+    $('refresh').hidden = !(state.profile && state.profile.admin);
     if (!b) {
       $('emptyText').textContent = state.order.length && state.loaded && !state.loadError
         ? 'No bill is open. Go back to the list or Home.' : emptyMessage();
@@ -809,6 +848,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function loadList() {
     state.loadError = false;
     api({ action: 'list' }).then(function (j) {
+      if (j.user) { state.profile = j.user; applyProfile(); }
       state.bills = new Map();
       state.order = [];
       (j.bills || []).slice().reverse().forEach(function (raw) {
@@ -860,7 +900,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   function askDelete() {
     var b = state.selected ? state.bills.get(state.selected) : null;
     if (!b) return;
-    $('delText').textContent = 'Delete ' + b.number + '? This removes the bill, your vote, notes and dates for good. It also removes it from any Amended onto list. This cannot be undone.';
+    var adm = state.profile && state.profile.admin;
+    $('delYes').textContent = adm ? 'Delete' : 'Clear';
+    $('delText').textContent = adm
+      ? 'Delete ' + b.number + ' for everyone? This removes the bill and every person\'s vote, notes and dates for it. This cannot be undone.'
+      : 'Clear your vote, notes and dates for ' + b.number + '? The bill stays in the shared library.';
     $('delConfirm').hidden = false;
   }
 
@@ -885,8 +929,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       state.selected = null;
       state.view = 'list';
       $('delConfirm').hidden = true;
-      showMsg(disp(id) + ' was deleted.');
-      renderAll(true);
+      showMsg(disp(id) + (state.profile && state.profile.admin ? ' was deleted.' : ' was cleared.'));
+      loadList();
       $('main').scrollTop = 0;
     }).catch(function (err) {
       showMsg(err.message, null, null, true);
@@ -921,7 +965,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var b = state.bills.get(state.selected);
     return {
       action: 'save', number: b.number, vote: state.vote, notes: $('notes').value, mydesc: $('myDesc').value,
-      mine: $('chkMine').checked, committee: $('chkCom').checked, stage: state.stage,
+      mine: $('chkMine').checked, committee: $('chkCom').checked, watch: $('chkWatch').checked, stage: state.stage,
       mystage: state.mystage, dates: JSON.parse(JSON.stringify(state.dates)),
       amendedto: state.amendedto.slice()
     };
@@ -994,11 +1038,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('myDesc').addEventListener('blur', flush);
   $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
-  $('chkWatch').addEventListener('change', function () {
-    if ($('chkWatch').checked) state.dates['w:on'] = { d: '', t: '', n: '1' }; else delete state.dates['w:on'];
-    markDirty();
-    flush();
-  });
+  $('chkWatch').addEventListener('change', function () { markDirty(); flush(); });
   $('amendAdd').addEventListener('submit', addAmended);
   document.querySelectorAll('[data-chamber]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -1029,8 +1069,107 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     btn.addEventListener('click', function () { goList(btn.getAttribute('data-go')); });
   });
 
+  // ---------- sign-in and settings ----------
+
+  function applyProfile() {
+    var p = state.profile || {};
+    $('menuCom').hidden = !p.chair;
+    $('comLabel').hidden = !p.chair;
+    $('comTitle').textContent = comName();
+    $('comLabelText').textContent = comName();
+    $('comStageTitle').textContent = comName() + ' stage';
+    $('stName').textContent = p.name || '';
+    $('stChair').checked = !!p.chair;
+    $('stCom').value = p.committee || '';
+    $('stComBox').hidden = !p.chair;
+    if (!p.chair && state.tab === 'committee') state.tab = 'all';
+  }
+
+  function remember(c) {
+    try { if (c) localStorage.setItem('bt_login', JSON.stringify(c)); else localStorage.removeItem('bt_login'); } catch (e) { /* ignore */ }
+  }
+
+  function doLogin(name, pin, silent) {
+    state.creds = { name: name, pin: pin };
+    $('liMsg').textContent = silent ? '' : 'Signing in...';
+    $('liGo').disabled = true;
+    api({ action: 'login' }).then(function (j) {
+      state.profile = j.user;
+      state.signedIn = true;
+      remember(state.creds);
+      $('liPin').value = '';
+      $('liMsg').textContent = '';
+      applyProfile();
+      state.view = 'home';
+      state.loaded = false;
+      renderAll(false);
+      loadList();
+    }).catch(function (err) {
+      state.creds = null;
+      state.signedIn = false;
+      remember(null);
+      $('liMsg').textContent = err.message;
+    }).then(function () { $('liGo').disabled = false; });
+  }
+
+  function signOut(msg) {
+    flush();
+    clearTimeout(state.timer);
+    state.signedIn = false;
+    state.creds = null;
+    state.profile = null;
+    state.bills = new Map();
+    state.order = [];
+    state.selected = null;
+    state.queue = [];
+    state.dirty = false;
+    state.loaded = false;
+    state.tab = 'all';
+    state.view = 'login';
+    remember(null);
+    showMsg('');
+    $('liPin').value = '';
+    $('liMsg').textContent = typeof msg === 'string' ? msg : '';
+    renderAll(false);
+    $('main').scrollTop = 0;
+  }
+
+  $('liGo').addEventListener('click', function () {
+    var n = $('liName').value.trim(), p = $('liPin').value.trim();
+    if (!n || !/^\d{4}$/.test(p)) { $('liMsg').textContent = 'Type your name and your 4-digit PIN.'; return; }
+    doLogin(n, p, false);
+  });
+  $('liPin').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('liGo').click(); });
+  $('liName').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('liPin').focus(); });
+  $('signOut').addEventListener('click', function () { signOut(''); });
+  $('setBtn').addEventListener('click', function () {
+    applyProfile();
+    $('stMsg').textContent = '';
+    state.view = 'settings';
+    renderAll(false);
+    $('main').scrollTop = 0;
+  });
+  $('stChair').addEventListener('change', function () { $('stComBox').hidden = !$('stChair').checked; });
+  $('stSave').addEventListener('click', function () {
+    var chair = $('stChair').checked, com = $('stCom').value.trim();
+    if (chair && !com) { $('stMsg').textContent = 'Type your committee name.'; return; }
+    $('stSave').disabled = true;
+    api({ action: 'settings', chair: chair, committee: com }).then(function (j) {
+      state.profile = j.user;
+      applyProfile();
+      renderAll(false);
+      $('stMsg').textContent = 'Saved.';
+    }).catch(function (err) {
+      $('stMsg').textContent = err.message;
+    }).then(function () { $('stSave').disabled = false; });
+  });
+
   renderAll(false);
-  loadList();
+  (function start() {
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem('bt_login') || 'null'); } catch (e) { saved = null; }
+    if (saved && saved.name && saved.pin) { $('liName').value = saved.name; doLogin(saved.name, saved.pin, true); }
+  })();
 })();
 </script>
 </body>
