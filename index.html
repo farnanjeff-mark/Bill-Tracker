@@ -167,6 +167,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 .tabs button:focus-visible { outline-color: var(--tab-bg); }
 /* Amended onto */
 .menu-btn .mi.i-amd { stroke: #6B3FA0; }
+.menu-btn .mi.i-watch { stroke: #B3541E; }
 .carrier-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-fg); font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
 .carrier-note button, .alink { align-self: flex-start; min-height: 36px; padding: 0; background: none; border: 0; color: var(--blue-fg); font-weight: 700; text-decoration: underline; text-align: left; }
 .arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
@@ -235,6 +236,10 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
           <svg class="mi i-amd" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M6 8.5c0 3 2 3.5 4.5 3.5h5"/></svg>
           <span class="mt"><span class="mtt">Amended To</span><span class="mtd">Bills carrying your language</span></span><span class="mn" data-count="amended">0</span>
         </button>
+        <button type="button" class="menu-btn" data-go="watch">
+          <svg class="mi i-watch" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="mt"><span class="mtt">Bills to Watch</span><span class="mtd">Bills you are keeping an eye on</span></span><span class="mn" data-count="watch">0</span>
+        </button>
       </div>
     </section>
 
@@ -280,6 +285,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <div class="checks">
         <label><input type="checkbox" id="chkMine"> My bills</label>
         <label><input type="checkbox" id="chkCom"> Professional Registration</label>
+        <label><input type="checkbox" id="chkWatch"> Bills to Watch</label>
       </div>
       <div id="myStageBox" hidden>
         <div class="lbl">My bill stage</div>
@@ -406,8 +412,12 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     if (state.tab === 'my') return !!b.mine;
     if (state.tab === 'committee') return !!b.committee;
     if (state.tab === 'amended') return mineOn(norm(b.number)).length > 0;
+    if (state.tab === 'watch') return isWatch(b);
     return true;
   }
+
+  // A bill is on the watch list when its saved dates hold the w:on flag.
+  function isWatch(b) { return !!(b && b.dates && b.dates['w:on']); }
 
   // Your bills that were amended onto the bill with this id.
   function mineOn(id) {
@@ -425,7 +435,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       all: all.length,
       my: all.filter(function (b) { return b.mine; }).length,
       committee: all.filter(function (b) { return b.committee; }).length,
-      amended: all.filter(function (b) { return mineOn(norm(b.number)).length > 0; }).length
+      amended: all.filter(function (b) { return mineOn(norm(b.number)).length > 0; }).length,
+      watch: all.filter(isWatch).length
     };
     document.querySelectorAll('[data-count]').forEach(function (el) {
       el.textContent = String(counts[el.getAttribute('data-count')]);
@@ -433,7 +444,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   }
 
   function renderList() {
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To' };
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To', watch: 'Bills to Watch' };
     var box = $('list');
     box.textContent = '';
     $('listTitle').textContent = names[state.tab];
@@ -459,6 +470,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       if (b.mydesc) line.appendChild(h('span', 'rmine', b.mydesc));
       btn.appendChild(line);
       if (b.title) btn.appendChild(h('span', 'rs', b.title));
+      if (state.tab === 'watch' && b.notes) btn.appendChild(h('span', 'rs', b.notes.split('\n')[0].slice(0, 100)));
       var when = dateKey ? fmtDT(b.dates && b.dates[dateKey]) : '';
       if (when) btn.appendChild(h('span', 'rd', when));
       if (state.tab === 'amended') {
@@ -487,7 +499,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       });
       return;
     }
-    if (state.tab === 'amended') ids.sort(byNumber);
+    if (state.tab === 'amended' || state.tab === 'watch') ids.sort(byNumber);
     ids.forEach(function (id) { box.appendChild(rowFor(id)); });
   }
 
@@ -503,6 +515,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('myDesc').value = b.mydesc || '';
     $('chkMine').checked = !!b.mine;
     $('chkCom').checked = !!b.committee;
+    $('chkWatch').checked = isWatch(b);
     state.stage = STAGES.indexOf(b.stage) >= 0 ? b.stage : '';
     state.mystage = MY_STAGES.indexOf(b.mystage) >= 0 ? b.mystage : '';
     state.dates = JSON.parse(JSON.stringify(b.dates || {}));
@@ -688,7 +701,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     var b = state.selected ? state.bills.get(state.selected) : null;
     var v = state.view;
     document.body.setAttribute('data-view', v);
-    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To' };
+    var names = { all: 'All bills', my: 'My bills', committee: 'Professional Registration', amended: 'Amended To', watch: 'Bills to Watch' };
     $('lookup').hidden = v !== 'home';
     $('homeBtn').hidden = v === 'home';
     $('backBtn').hidden = v !== 'bill';
@@ -703,6 +716,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     document.querySelectorAll('[data-vote]').forEach(function (btn) { btn.disabled = !b; });
     $('chkMine').disabled = !b;
     $('chkCom').disabled = !b;
+    $('chkWatch').disabled = !b;
     $('refresh').disabled = !b || state.busy;
     if (!b) {
       $('emptyText').textContent = state.order.length && state.loaded && !state.loadError
@@ -980,6 +994,11 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
   $('myDesc').addEventListener('blur', flush);
   $('chkMine').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
   $('chkCom').addEventListener('change', function () { renderStage(); markDirty(); flush(); });
+  $('chkWatch').addEventListener('change', function () {
+    if ($('chkWatch').checked) state.dates['w:on'] = { d: '', t: '', n: '1' }; else delete state.dates['w:on'];
+    markDirty();
+    flush();
+  });
   $('amendAdd').addEventListener('submit', addAmended);
   document.querySelectorAll('[data-chamber]').forEach(function (btn) {
     btn.addEventListener('click', function () {
