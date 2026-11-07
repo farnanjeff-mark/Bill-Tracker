@@ -171,6 +171,13 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 #loginCard input[type="text"], #loginCard input[type="password"], #settingsCard input[type="text"] { width: 100%; height: 46px; padding: 0 12px; font-size: 18px; background: var(--surface); border: 1px solid var(--field); border-radius: 8px; }
 #liMsg, #stMsg { min-height: 1.4em; font-weight: 600; }
 .topbtns { display: flex; gap: 8px; }
+.veh { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.veh:last-child { border-bottom: 0; }
+.veh .vn { font-weight: 700; color: var(--green); }
+.veh .vt { font-size: 15px; }
+.veh .vs { font-size: 14px; font-weight: 700; color: var(--blue-fg); }
+.veh .vr { font-size: 15px; color: var(--muted); }
+.veh .vb { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .carrier-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-fg); font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
 .carrier-note button, .alink { align-self: flex-start; min-height: 36px; padding: 0; background: none; border: 0; color: var(--blue-fg); font-weight: 700; text-decoration: underline; text-align: left; }
 .arow { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); min-height: 44px; }
@@ -341,6 +348,19 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       <p class="hint">Type each bill your bill was amended onto. It is looked up and saved, and shows under Amended To with a note about your bill.</p>
     </section>
 
+    <section class="card" id="vehCard" hidden>
+      <h3>Possible vehicles</h3>
+      <p class="hint">Other live Missouri bills that might carry this bill's language as an amendment.</p>
+      <div class="chamber" id="vehScope" role="group" aria-label="Where to search">
+        <button type="button" data-scope="both" aria-pressed="true">Both chambers</button>
+        <button type="button" data-scope="other" aria-pressed="false">Other chamber only</button>
+      </div>
+      <button class="btn" id="vehGo" type="button">Find possible vehicles</button>
+      <p class="hint" id="vehMsg" role="status"></p>
+      <div id="vehList"></div>
+      <p class="hint">This is a judgment, not legal advice. Missouri's original-purpose and single-subject rules limit what an amendment can carry. Read the bill text and check with House Research before relying on any of these.</p>
+    </section>
+
     <section id="listWrap" hidden>
       <div class="listhead"><h3 id="listTitle">All bills</h3><span id="listCount"></span></div>
       <div id="list"></div>
@@ -367,7 +387,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
 
   var state = {
     bills: new Map(), order: [], selected: null, tab: 'all', view: 'login', vote: 'Undecided', stage: '', mystage: '', dates: {}, amendedto: [],
-    chamber: 'HB', creds: null, profile: null, signedIn: false, dirty: false, loaded: false, loadError: false, busy: false, saving: false,
+    chamber: 'HB', vscope: 'both', creds: null, profile: null, signedIn: false, dirty: false, loaded: false, loadError: false, busy: false, saving: false,
     queue: [], timer: null, saveErr: false
   };
 
@@ -393,7 +413,9 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       vote: s(b.vote) || 'Undecided', stage: s(b.stage), mystage: s(b.mystage),
       dates: (b.dates && typeof b.dates === 'object') ? b.dates : {},
       amendedto: Array.isArray(b.amendedto) ? b.amendedto.map(String) : [], notes: s(b.notes), mine: mine, committee: com,
-      watch: b.watch === true || String(b.watch).toUpperCase() === 'TRUE'
+      watch: b.watch === true || String(b.watch).toUpperCase() === 'TRUE',
+      vehicles: Array.isArray(b.vehicles) ? b.vehicles.map(function (v) { return { number: s(v.number), title: s(v.title), reason: s(v.reason), stage: s(v.stage) }; }) : [],
+      vehiclesat: s(b.vehiclesat)
     };
   }
 
@@ -672,14 +694,19 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     renderTabs();
     renderList();
     renderAmend();
+    renderVehicles();
   }
 
   function addAmended(e) {
     e.preventDefault();
+    var id0 = norm($('amendNum').value);
+    if (/^\d{1,5}$/.test(id0)) id0 = state.chamber + id0;
+    addAmendedId(id0);
+  }
+
+  function addAmendedId(id) {
     if (!state.selected || state.busy) return;
     var mine = state.selected;
-    var id = norm($('amendNum').value);
-    if (/^\d{1,5}$/.test(id)) id = state.chamber + id;
     if (!/^[A-Z]{2,4}\d{1,5}$/.test(id)) {
       showMsg('Type the bill number, like 2600. Tap House or Senate first.', null, null, true);
       return;
@@ -708,6 +735,73 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     }).then(function () {
       setBusy(false);
       $('amendBtn').disabled = false;
+    });
+  }
+
+  function renderVehicles() {
+    var b = state.selected ? state.bills.get(state.selected) : null;
+    var admin = !!(state.profile && state.profile.admin);
+    var has = !!(b && b.vehicles && b.vehicles.length);
+    $('vehCard').hidden = !b || state.view !== 'bill' || !(admin || has || (b && b.vehiclesat));
+    $('vehGo').hidden = !admin;
+    $('vehScope').hidden = !admin;
+    var box = $('vehList');
+    box.textContent = '';
+    if (!b) return;
+    if (b.vehiclesat && !$('vehMsg').getAttribute('data-keep')) {
+      var d = new Date(b.vehiclesat);
+      $('vehMsg').textContent = (isNaN(d) ? '' : 'Last searched ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + '. ') + (has ? '' : 'No good vehicles were found.');
+    }
+    (b.vehicles || []).forEach(function (v) {
+      var id = norm(v.number);
+      var row = h('div', 'veh');
+      var top = h('div', 'vb');
+      if (state.bills.has(id)) {
+        var go = h('button', 'alink', v.number);
+        go.type = 'button';
+        go.addEventListener('click', function () { select(id); });
+        top.appendChild(go);
+      } else {
+        top.appendChild(h('span', 'vn', v.number));
+      }
+      var listed = state.amendedto.some(function (x) { return norm(x) === id; });
+      if (listed) {
+        top.appendChild(h('span', 'rd', 'In Amended onto'));
+      } else {
+        var add = h('button', 'alink', 'Add to Amended onto');
+        add.type = 'button';
+        add.addEventListener('click', function () { addAmendedId(id); });
+        top.appendChild(add);
+      }
+      row.appendChild(top);
+      if (v.title) row.appendChild(h('span', 'vt', v.title));
+      if (v.stage) row.appendChild(h('span', 'vs', v.stage));
+      if (v.reason) row.appendChild(h('span', 'vr', v.reason));
+      box.appendChild(row);
+    });
+  }
+
+  function findVehicles() {
+    if (!state.selected || state.busy) return;
+    var id = state.selected;
+    var b = state.bills.get(id);
+    if (!b) return;
+    flush();
+    setBusy(true);
+    $('vehGo').disabled = true;
+    $('vehMsg').setAttribute('data-keep', '1');
+    $('vehMsg').textContent = 'Searching live bills. This can take up to a minute.';
+    api({ action: 'vehicles', number: b.number, scope: state.vscope }).then(function (j) {
+      var nb = clean(j.bill);
+      var cur = state.bills.get(id);
+      if (cur) { cur.vehicles = nb.vehicles; cur.vehiclesat = nb.vehiclesat; }
+      $('vehMsg').textContent = j.note || (nb.vehicles.length ? 'Found ' + nb.vehicles.length + '. Saved with this bill.' : 'No good vehicles were found.');
+      renderVehicles();
+    }).catch(function (err) {
+      $('vehMsg').textContent = err.message;
+    }).then(function () {
+      setBusy(false);
+      $('vehGo').disabled = false;
     });
   }
 
@@ -751,6 +845,7 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('noteCard').hidden = !b || v !== 'bill';
     $('amendCard').hidden = !b || v !== 'bill';
     $('empty').hidden = !!b || v !== 'bill';
+    renderVehicles();
     document.querySelectorAll('[data-vote]').forEach(function (btn) { btn.disabled = !b; });
     $('chkMine').disabled = !b;
     $('chkCom').disabled = !b;
@@ -791,6 +886,8 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
     $('delConfirm').hidden = true;
     state.view = 'bill';
     state.selected = id;
+    $('vehMsg').removeAttribute('data-keep');
+    $('vehMsg').textContent = '';
     state.dirty = false;
     renderAll(true);
     $('main').scrollTop = 0;
@@ -1045,6 +1142,15 @@ footer .in { padding-top: 10px; padding-bottom: 10px; display: flex; flex-direct
       state.chamber = btn.getAttribute('data-chamber');
       document.querySelectorAll('[data-chamber]').forEach(function (b2) {
         b2.setAttribute('aria-pressed', String(b2.getAttribute('data-chamber') === state.chamber));
+      });
+    });
+  });
+  $('vehGo').addEventListener('click', findVehicles);
+  document.querySelectorAll('[data-scope]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.vscope = btn.getAttribute('data-scope');
+      document.querySelectorAll('[data-scope]').forEach(function (b2) {
+        b2.setAttribute('aria-pressed', String(b2.getAttribute('data-scope') === state.vscope));
       });
     });
   });
